@@ -15,8 +15,10 @@
     { id: 'playoffs', label: 'Playoffs', icon: 'bracket' },
   ];
 
+  const base = import.meta.env.BASE_URL;
+
   async function load() {
-    const res = await fetch('/tournament.json');
+    const res = await fetch(`${base}tournament.json`);
     tournament = await res.json();
     await detectPhotos();
   }
@@ -26,7 +28,7 @@
     const exts = ['jpg', 'jpeg', 'png', 'webp'];
     const checks = allGames.flatMap(g =>
       exts.map(ext => {
-        const url = `/photos/${g.id}.${ext}`;
+        const url = `${base}photos/${g.id}.${ext}`;
         return fetch(url, { method: 'HEAD' })
           .then(r => {
             const ct = r.headers.get('content-type') || '';
