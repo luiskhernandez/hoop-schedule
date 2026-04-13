@@ -14,9 +14,14 @@
 
 {#if src}
   <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <div class="overlay" onclick={handleClick} role="dialog" aria-modal="true">
+  <div class="overlay" onclick={handleClick} role="dialog" aria-modal="true" tabindex="-1">
     <div class="wrap">
-      <button class="close" onclick={onclose} aria-label="Close">&times;</button>
+      <button class="close" onclick={onclose} aria-label="Close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
       <img {src} alt="Game scoresheet" class="img" />
     </div>
   </div>
@@ -27,8 +32,8 @@
     position: fixed;
     inset: 0;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.92);
-    backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(16px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,24 +56,25 @@
     max-width: 100%;
     max-height: calc(100vh - 4rem);
     max-height: calc(100dvh - 4rem);
-    border-radius: 0.5rem;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    border-radius: 0.75rem;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.3);
     object-fit: contain;
   }
 
   .close {
     position: absolute;
-    top: -2rem;
+    top: -2.5rem;
     right: 0;
-    background: none;
+    background: rgba(255,255,255,0.15);
     border: none;
-    color: #a1a1aa;
-    font-size: 2rem;
+    color: white;
     cursor: pointer;
-    padding: 0.5rem;
-    line-height: 1;
-    transition: color 0.15s;
+    padding: 0.35rem;
+    border-radius: 50%;
+    line-height: 0;
+    transition: background 0.15s;
+    backdrop-filter: blur(4px);
   }
 
-  .close:hover { color: white; }
+  .close:hover { background: rgba(255,255,255,0.25); }
 </style>

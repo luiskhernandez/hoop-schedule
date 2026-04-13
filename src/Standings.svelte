@@ -23,7 +23,7 @@
   let anyPlayed = $derived(standings.some(r => r.gp > 0));
 </script>
 
-<div class="standings-page">
+<div class="page">
   <div class="section-head">
     <h2 class="section-title">Standings</h2>
     <span class="section-sub">Regular Season</span>
@@ -35,47 +35,34 @@
       {@const top2 = i < 2}
 
       <div class="rank-card" class:top2 style="animation-delay: {i * 50}ms">
-        <div class="rank-pos" class:gold={top2}>
-          {i + 1}
+        <div class="rank-left">
+          <span class="rank-num" class:gold={top2}>{i + 1}</span>
+          <span class="team-bar" style="background:{row.team.color}"></span>
+          <div class="team-info">
+            <span class="team-name">{row.team.name}</span>
+            <div class="record">
+              <span class="record-w">{row.w}W</span>
+              <span class="record-l">{row.l}L</span>
+            </div>
+          </div>
         </div>
 
-        <div class="rank-main">
-          <div class="rank-team">
-            <span class="rank-color" style="background:{row.team.color}"></span>
-            <span class="rank-name">{row.team.name}</span>
-            {#if top2}
-              <span class="playoff-tag">Playoffs</span>
-            {/if}
-          </div>
-
-          <div class="rank-stats">
-            <div class="stat">
-              <span class="stat-val wins">{row.w}</span>
-              <span class="stat-label">W</span>
+        <div class="rank-right">
+          {#if top2}
+            <span class="playoff-badge">&#9733;</span>
+          {/if}
+          <div class="stat-group">
+            <div class="stat-item">
+              <span class="stat-num">{row.pf}</span>
+              <span class="stat-lbl">PF</span>
             </div>
-            <div class="stat">
-              <span class="stat-val losses">{row.l}</span>
-              <span class="stat-label">L</span>
+            <div class="stat-item">
+              <span class="stat-num">{row.pa}</span>
+              <span class="stat-lbl">PA</span>
             </div>
-            <div class="stat-sep"></div>
-            <div class="stat">
-              <span class="stat-val">{row.pf}</span>
-              <span class="stat-label">PF</span>
-            </div>
-            <div class="stat">
-              <span class="stat-val">{row.pa}</span>
-              <span class="stat-label">PA</span>
-            </div>
-            <div class="stat-sep"></div>
-            <div class="stat">
-              <span class="stat-val diff" class:pos={diff > 0} class:neg={diff < 0}>
-                {#if anyPlayed}
-                  {diff > 0 ? '+' : ''}{diff}
-                {:else}
-                  &ndash;
-                {/if}
-              </span>
-              <span class="stat-label">+/&ndash;</span>
+            <div class="stat-item diff" class:pos={diff > 0} class:neg={diff < 0}>
+              <span class="stat-num">{anyPlayed ? (diff > 0 ? '+' : '') + diff : '–'}</span>
+              <span class="stat-lbl">+/–</span>
             </div>
           </div>
         </div>
@@ -83,13 +70,11 @@
     {/each}
   </div>
 
-  <p class="footnote">Top 2 advance to semifinals with a bye</p>
+  <p class="footnote">&#9733; Top 2 advance to semifinals with a bye</p>
 </div>
 
 <style>
-  .standings-page {
-    padding: 0 1rem 6rem;
-  }
+  .page { padding: 0 1.25rem 6rem; }
 
   .section-head {
     display: flex;
@@ -101,14 +86,14 @@
   .section-title {
     font-family: var(--font-display);
     font-size: 1.3rem;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-weight: 800;
     color: var(--text);
   }
 
   .section-sub {
     font-size: 0.75rem;
-    color: var(--text-dim);
+    font-weight: 500;
+    color: var(--text-muted);
   }
 
   .cards {
@@ -119,12 +104,14 @@
 
   .rank-card {
     display: flex;
-    align-items: stretch;
+    align-items: center;
+    justify-content: space-between;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.875rem;
-    overflow: hidden;
+    border-radius: var(--radius);
+    padding: 0.875rem 1rem;
+    box-shadow: var(--shadow-sm);
     animation: card-in 0.3s ease both;
+    gap: 0.5rem;
   }
 
   @keyframes card-in {
@@ -133,110 +120,112 @@
   }
 
   .rank-card.top2 {
-    border-color: rgba(245, 158, 11, 0.2);
-    background: linear-gradient(135deg, rgba(245,158,11,0.04), transparent);
+    box-shadow: var(--shadow-md), 0 0 0 1.5px rgba(22, 163, 74, 0.15);
+    background: linear-gradient(135deg, rgba(22,163,74,0.03), var(--surface));
   }
 
-  .rank-pos {
+  .rank-left {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 2.75rem;
-    flex-shrink: 0;
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.3rem;
-    color: var(--text-dim);
-    border-right: 1px solid var(--border);
-  }
-
-  .rank-pos.gold { color: var(--amber); }
-
-  .rank-main {
-    flex: 1;
-    padding: 0.75rem 0.875rem;
+    gap: 0.625rem;
     min-width: 0;
   }
 
-  .rank-team {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+  .rank-num {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    min-width: 1.25rem;
+    text-align: center;
   }
 
-  .rank-color {
+  .rank-num.gold { color: var(--accent); }
+
+  .team-bar {
     width: 4px;
-    height: 1.25rem;
+    height: 2rem;
     border-radius: 2px;
     flex-shrink: 0;
   }
 
-  .rank-name {
-    font-weight: 500;
+  .team-info {
+    min-width: 0;
+  }
+
+  .team-name {
+    font-weight: 600;
     font-size: 0.95rem;
     color: var(--text);
+    display: block;
   }
 
-  .playoff-tag {
-    font-family: var(--font-display);
-    font-size: 0.55rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
-    background: var(--amber-dim);
-    color: var(--amber);
-    margin-left: auto;
+  .record {
+    display: flex;
+    gap: 0.375rem;
+    margin-top: 0.15rem;
   }
 
-  .rank-stats {
+  .record-w {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  .record-l {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--red);
+  }
+
+  .rank-right {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    flex-shrink: 0;
   }
 
-  .stat {
+  .playoff-badge {
+    color: var(--accent);
+    font-size: 0.9rem;
+  }
+
+  .stat-group {
+    display: flex;
+    gap: 0.625rem;
+  }
+
+  .stat-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.1rem;
-    min-width: 1.5rem;
+    gap: 0.05rem;
+    min-width: 1.75rem;
   }
 
-  .stat-val {
+  .stat-num {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
     line-height: 1;
-    color: var(--text-muted);
   }
 
-  .stat-val.wins { color: var(--green); }
-  .stat-val.losses { color: var(--red); }
-  .stat-val.diff { color: var(--text-dim); }
-  .stat-val.diff.pos { color: var(--green); }
-  .stat-val.diff.neg { color: var(--red); }
-
-  .stat-label {
-    font-family: var(--font-display);
+  .stat-lbl {
     font-size: 0.5rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
     color: var(--text-dim);
   }
 
-  .stat-sep {
-    width: 1px;
-    height: 1.5rem;
-    background: var(--border);
-  }
+  .diff.pos .stat-num { color: var(--green); }
+  .diff.neg .stat-num { color: var(--red); }
 
   .footnote {
     font-size: 0.7rem;
-    color: var(--text-dim);
+    font-weight: 500;
+    color: var(--text-muted);
     margin-top: 1rem;
     text-align: center;
   }

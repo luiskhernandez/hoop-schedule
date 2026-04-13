@@ -56,17 +56,18 @@
 </script>
 
 <div class="shell">
-  <!-- Header -->
   <header class="header">
     <div class="header-inner">
       <div class="brand">
-        <svg width="28" height="28" viewBox="0 0 40 40" fill="none" class="logo">
-          <circle cx="20" cy="20" r="18" stroke="var(--amber)" stroke-width="2"/>
-          <path d="M20 2 L20 38" stroke="var(--amber)" stroke-width="1" opacity="0.3"/>
-          <path d="M2 20 L38 20" stroke="var(--amber)" stroke-width="1" opacity="0.3"/>
-          <path d="M20 8 C26 8, 32 14, 32 20" stroke="var(--amber)" stroke-width="1.5" opacity="0.4"/>
-          <path d="M20 32 C14 32, 8 26, 8 20" stroke="var(--amber)" stroke-width="1.5" opacity="0.4"/>
-        </svg>
+        <div class="logo-mark">
+          <svg width="26" height="26" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="var(--accent)" stroke-width="2.5"/>
+            <path d="M20 2 L20 38" stroke="var(--accent)" stroke-width="1.2" opacity="0.35"/>
+            <path d="M2 20 L38 20" stroke="var(--accent)" stroke-width="1.2" opacity="0.35"/>
+            <path d="M20 8 C26 8, 32 14, 32 20" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
+            <path d="M20 32 C14 32, 8 26, 8 20" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
+          </svg>
+        </div>
         {#if tournament}
           <div>
             <h1 class="title">{tournament.name}</h1>
@@ -77,7 +78,6 @@
     </div>
   </header>
 
-  <!-- Content -->
   <main class="content">
     {#if tournament}
       {#if currentTab === 'schedule'}
@@ -90,7 +90,6 @@
     {/if}
   </main>
 
-  <!-- Bottom Nav -->
   <nav class="bottom-nav">
     {#each tabs as tab}
       <button
@@ -99,27 +98,29 @@
         onclick={() => currentTab = tab.id}
         type="button"
       >
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          {#if tab.icon === 'calendar'}
-            <rect x="3" y="4" width="18" height="18" rx="2"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-            <line x1="9" y1="2" x2="9" y2="6"/>
-            <line x1="15" y1="2" x2="15" y2="6"/>
-          {:else if tab.icon === 'trophy'}
-            <path d="M6 9H4a2 2 0 01-2-2V5h4"/>
-            <path d="M18 9h2a2 2 0 002-2V5h-4"/>
-            <path d="M4 5h16v4a6 6 0 01-6 6h-4a6 6 0 01-6-6V5z"/>
-            <path d="M12 15v3"/>
-            <path d="M8 21h8"/>
-            <path d="M8 18h8"/>
-          {:else if tab.icon === 'bracket'}
-            <path d="M4 4v6a2 2 0 002 2h2"/>
-            <path d="M4 20v-6a2 2 0 012-2h2"/>
-            <path d="M20 4v6a2 2 0 01-2 2h-2"/>
-            <path d="M20 20v-6a2 2 0 00-2-2h-2"/>
-            <line x1="8" y1="12" x2="16" y2="12"/>
-          {/if}
-        </svg>
+        <div class="nav-icon-wrap">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            {#if tab.icon === 'calendar'}
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <line x1="9" y1="2" x2="9" y2="6"/>
+              <line x1="15" y1="2" x2="15" y2="6"/>
+            {:else if tab.icon === 'trophy'}
+              <path d="M6 9H4a2 2 0 01-2-2V5h4"/>
+              <path d="M18 9h2a2 2 0 002-2V5h-4"/>
+              <path d="M4 5h16v4a6 6 0 01-6 6h-4a6 6 0 01-6-6V5z"/>
+              <path d="M12 15v3"/>
+              <path d="M8 21h8"/>
+              <path d="M8 18h8"/>
+            {:else if tab.icon === 'bracket'}
+              <path d="M4 4v6a2 2 0 002 2h2"/>
+              <path d="M4 20v-6a2 2 0 012-2h2"/>
+              <path d="M20 4v6a2 2 0 01-2 2h-2"/>
+              <path d="M20 20v-6a2 2 0 00-2-2h-2"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            {/if}
+          </svg>
+        </div>
         <span class="nav-label">{tab.label}</span>
       </button>
     {/each}
@@ -136,21 +137,22 @@
     max-width: 30rem;
     margin: 0 auto;
     width: 100%;
+    background: var(--bg);
   }
 
-  /* --- Header --- */
   .header {
     flex-shrink: 0;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-    padding: 0.75rem 1rem;
-    padding-top: max(0.75rem, env(safe-area-inset-top));
+    background: var(--surface);
+    padding: 0.875rem 1.25rem;
+    padding-top: max(0.875rem, env(safe-area-inset-top));
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    z-index: 5;
   }
 
   .header-inner {
     display: flex;
     align-items: center;
-    justify-content: space-between;
   }
 
   .brand {
@@ -159,26 +161,34 @@
     gap: 0.75rem;
   }
 
-  .logo { flex-shrink: 0; }
+  .logo-mark {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-light);
+    border-radius: 0.75rem;
+    flex-shrink: 0;
+  }
 
   .title {
     font-family: var(--font-display);
-    font-size: 1.15rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
+    letter-spacing: 0.01em;
+    line-height: 1.15;
     color: var(--text);
   }
 
   .meta {
     font-size: 0.7rem;
-    color: var(--text-dim);
+    font-weight: 500;
+    color: var(--text-muted);
     margin-top: 0.1rem;
-    letter-spacing: 0.03em;
   }
 
-  /* --- Content --- */
   .content {
     flex: 1;
     overflow-y: auto;
@@ -186,13 +196,14 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* --- Bottom Nav --- */
   .bottom-nav {
     flex-shrink: 0;
     display: flex;
-    border-top: 1px solid var(--border);
     background: var(--surface);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
     padding-bottom: var(--safe-bottom);
+    position: relative;
+    z-index: 5;
   }
 
   .nav-btn {
@@ -200,53 +211,45 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.2rem;
-    padding: 0.6rem 0;
+    gap: 0.15rem;
+    padding: 0.5rem 0 0.4rem;
     background: none;
     border: none;
-    color: var(--text-dim);
+    color: var(--text-muted);
     cursor: pointer;
     transition: color 0.2s;
-    position: relative;
   }
 
-  .nav-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 25%;
-    right: 25%;
-    height: 2px;
-    background: var(--amber);
-    border-radius: 0 0 2px 2px;
-    opacity: 0;
-    transition: opacity 0.2s;
+  .nav-icon-wrap {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    transition: background 0.2s;
+  }
+
+  .nav-btn.active .nav-icon-wrap {
+    background: var(--accent-light);
   }
 
   .nav-btn.active {
-    color: var(--amber);
-  }
-
-  .nav-btn.active::before {
-    opacity: 1;
+    color: var(--accent);
   }
 
   .nav-icon {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
   }
 
   .nav-label {
-    font-family: var(--font-display);
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
   }
 
   @media (min-width: 640px) {
     .shell { max-width: 48rem; }
-    .header { padding: 1rem 1.5rem; }
-    .title { font-size: 1.4rem; }
   }
 </style>

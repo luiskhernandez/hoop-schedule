@@ -28,7 +28,7 @@
   let grandFinal = $derived(games.filter(g => g.round === 'grand_final'));
 </script>
 
-<div class="playoffs-page">
+<div class="page">
   <div class="section-head">
     <h2 class="section-title">Playoffs</h2>
     <span class="section-sub">Double Elimination</span>
@@ -36,7 +36,6 @@
 
   <p class="format-note">Lose twice = eliminated &middot; Top 2 seeds get byes</p>
 
-  <!-- Bracket toggle -->
   <div class="bracket-toggle">
     <button
       class="toggle-btn"
@@ -44,7 +43,7 @@
       onclick={() => activeBracket = 'winners'}
       type="button"
     >
-      <span class="toggle-dot winners-dot"></span>
+      <span class="dot dot-green"></span>
       Winners
     </button>
     <button
@@ -53,12 +52,11 @@
       onclick={() => activeBracket = 'losers'}
       type="button"
     >
-      <span class="toggle-dot losers-dot"></span>
+      <span class="dot dot-red"></span>
       Losers
     </button>
   </div>
 
-  <!-- Rounds -->
   <div class="rounds">
     {#each brackets[activeBracket] as round}
       {@const roundGames = games.filter(g => g.round === round.key)}
@@ -78,7 +76,7 @@
             onclick={() => hasPhoto && openPhoto(game.id)}
             type="button"
           >
-            <div class="po-meta">
+            <div class="po-header">
               <span class="po-id">{game.id}</span>
               {#if hasPhoto}<span class="po-photo">&#128247;</span>{/if}
               <span class="po-date">{game.date ? fmtDate(game.date) : 'TBD'}</span>
@@ -86,7 +84,7 @@
 
             <div class="po-team" class:is-winner={w1} class:is-loser={has && !w1}>
               {#if t1}
-                <span class="po-color" style="background:{t1.color}"></span>
+                <span class="po-bar" style="background:{t1.color}"></span>
                 <span class="po-name">{t1.name}</span>
               {:else}
                 <span class="po-source">{game.source1}</span>
@@ -94,9 +92,11 @@
               <span class="po-score">{has ? game.score1 : '–'}</span>
             </div>
 
+            <div class="po-divider"></div>
+
             <div class="po-team" class:is-winner={w2} class:is-loser={has && !w2}>
               {#if t2}
-                <span class="po-color" style="background:{t2.color}"></span>
+                <span class="po-bar" style="background:{t2.color}"></span>
                 <span class="po-name">{t2.name}</span>
               {:else}
                 <span class="po-source">{game.source2}</span>
@@ -109,7 +109,6 @@
     {/each}
   </div>
 
-  <!-- Grand Final -->
   {#if grandFinal.length}
     <div class="gf-section">
       <div class="gf-label">Grand Final</div>
@@ -127,25 +126,24 @@
           onclick={() => hasPhoto && openPhoto(game.id)}
           type="button"
         >
-          <div class="po-meta">
+          <div class="po-header">
             <span class="po-id">{game.id}</span>
             {#if hasPhoto}<span class="po-photo">&#128247;</span>{/if}
             <span class="po-date">{game.date ? fmtDate(game.date) : 'TBD'}</span>
           </div>
-
           <div class="po-team" class:is-winner={w1} class:is-loser={has && !w1}>
             {#if t1}
-              <span class="po-color" style="background:{t1.color}"></span>
+              <span class="po-bar" style="background:{t1.color}"></span>
               <span class="po-name">{t1.name}</span>
             {:else}
               <span class="po-source">{game.source1}</span>
             {/if}
             <span class="po-score">{has ? game.score1 : '–'}</span>
           </div>
-
+          <div class="po-divider"></div>
           <div class="po-team" class:is-winner={w2} class:is-loser={has && !w2}>
             {#if t2}
-              <span class="po-color" style="background:{t2.color}"></span>
+              <span class="po-bar" style="background:{t2.color}"></span>
               <span class="po-name">{t2.name}</span>
             {:else}
               <span class="po-source">{game.source2}</span>
@@ -159,9 +157,7 @@
 </div>
 
 <style>
-  .playoffs-page {
-    padding: 0 1rem 6rem;
-  }
+  .page { padding: 0 1.25rem 6rem; }
 
   .section-head {
     display: flex;
@@ -173,31 +169,30 @@
   .section-title {
     font-family: var(--font-display);
     font-size: 1.3rem;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-weight: 800;
     color: var(--text);
   }
 
   .section-sub {
     font-size: 0.75rem;
-    color: var(--text-dim);
+    font-weight: 500;
+    color: var(--text-muted);
   }
 
   .format-note {
     font-size: 0.7rem;
-    color: var(--text-dim);
+    font-weight: 500;
+    color: var(--text-muted);
     margin-bottom: 1rem;
   }
 
-  /* --- Toggle --- */
   .bracket-toggle {
     display: flex;
-    gap: 0.25rem;
+    gap: 0;
     padding: 0.2rem;
-    background: var(--surface);
-    border-radius: 0.625rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--border);
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.25rem;
   }
 
   .toggle-btn {
@@ -206,15 +201,13 @@
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    padding: 0.55rem;
+    padding: 0.6rem;
     border: none;
     border-radius: 0.5rem;
     background: transparent;
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-weight: 700;
     color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s;
@@ -223,20 +216,15 @@
   .toggle-btn:active { transform: scale(0.97); }
 
   .toggle-btn.active {
-    background: var(--surface2);
+    background: var(--surface);
     color: var(--text);
+    box-shadow: var(--shadow-sm);
   }
 
-  .toggle-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-green { background: var(--green); }
+  .dot-red { background: var(--red); }
 
-  .winners-dot { background: var(--green); }
-  .losers-dot { background: var(--red); }
-
-  /* --- Rounds --- */
   .rounds {
     display: flex;
     flex-direction: column;
@@ -246,63 +234,66 @@
   .round-label {
     font-family: var(--font-display);
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
     margin-bottom: 0.5rem;
   }
 
-  /* --- Playoff Card --- */
   .po-card {
     display: block;
     width: 100%;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.75rem;
+    border-radius: var(--radius-sm);
     overflow: hidden;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
     cursor: default;
     transition: all 0.2s;
     text-align: left;
     font-family: inherit;
     font-size: inherit;
     color: inherit;
+    box-shadow: var(--shadow-sm);
+    border: none;
   }
 
-  .po-card:hover { border-color: var(--border-hover); }
+  .po-card:hover { box-shadow: var(--shadow-md); }
   .po-card.has-photo { cursor: pointer; }
   .po-card.has-photo:active { transform: scale(0.98); }
-  .po-card.has-photo:hover { border-color: rgba(245,158,11,0.3); }
 
-  .po-meta {
+  .po-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.35rem 0.75rem;
-    border-bottom: 1px solid var(--border);
-    background: rgba(255,255,255,0.01);
+    padding: 0.4rem 0.875rem;
+    background: var(--surface2);
   }
 
   .po-id {
     font-family: var(--font-display);
     font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    color: var(--text-dim);
+    font-weight: 700;
+    color: var(--text-muted);
   }
 
-  .po-date { font-size: 0.65rem; color: var(--text-dim); }
-  .po-photo { font-size: 0.7rem; opacity: 0.4; }
+  .po-date { font-size: 0.65rem; font-weight: 500; color: var(--text-muted); }
+  .po-photo { font-size: 0.7rem; opacity: 0.5; }
 
   .po-team {
     display: flex;
     align-items: center;
-    padding: 0.5rem 0.75rem;
+    padding: 0.6rem 0.875rem;
     gap: 0.5rem;
   }
 
-  .po-color {
+  .po-divider {
+    height: 1px;
+    margin: 0 0.875rem;
+    background: var(--border);
+  }
+
+  .po-bar {
     width: 3px;
     height: 1.25rem;
     border-radius: 2px;
@@ -311,7 +302,7 @@
 
   .po-name {
     flex: 1;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.875rem;
     color: var(--text);
   }
@@ -319,6 +310,7 @@
   .po-source {
     flex: 1;
     font-size: 0.75rem;
+    font-weight: 500;
     color: var(--text-dim);
     font-style: italic;
   }
@@ -332,30 +324,29 @@
     text-align: right;
   }
 
-  .po-team.is-winner .po-name { color: #fff; }
-  .po-team.is-winner .po-score { color: #fff; }
+  .po-team.is-winner .po-name { color: var(--text); font-weight: 700; }
+  .po-team.is-winner .po-score { color: var(--accent); }
   .po-team.is-loser .po-name { color: var(--text-muted); }
-  .po-team.is-loser .po-score { color: var(--text-muted); }
+  .po-team.is-loser .po-score { color: var(--text-dim); }
 
-  /* --- Grand Final --- */
   .gf-section {
     margin-top: 1.5rem;
     padding-top: 1.25rem;
-    border-top: 1px solid var(--border);
+    border-top: 2px solid var(--border);
   }
 
   .gf-label {
     font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1rem;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--amber);
+    letter-spacing: 0.04em;
+    color: var(--accent);
     margin-bottom: 0.75rem;
     text-align: center;
   }
 
   .gf-card {
-    border-color: rgba(245, 158, 11, 0.15);
+    box-shadow: var(--shadow-md), 0 0 0 1.5px rgba(22, 163, 74, 0.12);
   }
 </style>

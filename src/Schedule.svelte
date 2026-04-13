@@ -33,7 +33,6 @@
 
   let selectedWeek = $state(null);
 
-  // Auto-select current week on first render
   $effect(() => {
     if (selectedWeek === null && currentWeek !== null) {
       selectedWeek = currentWeek;
@@ -47,7 +46,6 @@
   );
 </script>
 
-<!-- Week selector strip -->
 <div class="week-strip-wrap">
   <div class="week-strip">
     {#each weeks as [w]}
@@ -61,7 +59,6 @@
         class="week-chip"
         class:selected={isSelected}
         class:current={isCurrent && !isSelected}
-        class:has-results={hasResults}
         onclick={() => selectedWeek = wn}
         type="button"
       >
@@ -77,15 +74,15 @@
   </div>
 </div>
 
-<!-- Selected week games -->
 {#if selectedGames.length > 0}
   {@const satDate = selectedGames.find(g => g.day === 'saturday')?.date}
   {@const sunDate = selectedGames.find(g => g.day === 'sunday')?.date}
 
   <div class="week-info">
-    <span class="week-title">Week {selectedWeek}</span>
-    <span class="week-sep">&middot;</span>
-    <span class="week-dates">{shortDate(satDate)} – {shortDate(sunDate)}</span>
+    <div class="week-info-left">
+      <span class="week-title">Week {selectedWeek}</span>
+      <span class="week-dates">{shortDate(satDate)} – {shortDate(sunDate)}</span>
+    </div>
     <span class="week-round">Round {selectedGames[0].round}</span>
   </div>
 
@@ -106,64 +103,59 @@
         type="button"
         style="animation-delay: {idx * 60}ms"
       >
-        <div class="game-date">
-          <span class="date-day" class:is-sat={game.day === 'saturday'}>
+        <div class="game-top">
+          <span class="game-day" class:is-sat={game.day === 'saturday'}>
             {fmtDate(game.date)}
           </span>
           {#if hasPhoto}
-            <span class="photo-badge">&#128247; Scoresheet</span>
+            <span class="photo-badge">&#128247;</span>
+          {/if}
+          {#if !has}
+            <span class="upcoming-tag">Upcoming</span>
           {/if}
         </div>
 
-        <div class="matchup">
-          <!-- Team 1 -->
-          <div class="team-row" class:is-winner={w1} class:is-loser={has && !w1}>
-            <div class="team-identity">
-              <span class="team-color" style="background:{t1.color}"></span>
-              <span class="team-name">{t1.name}</span>
-            </div>
-            <span class="team-score">
-              {#if has}{game.score1}{:else}&ndash;{/if}
-            </span>
+        <div class="team-row" class:is-winner={w1} class:is-loser={has && !w1}>
+          <div class="team-id">
+            <span class="team-bar" style="background:{t1.color}"></span>
+            <span class="team-name">{t1.name}</span>
           </div>
-
-          <!-- Team 2 -->
-          <div class="team-row" class:is-winner={w2} class:is-loser={has && !w2}>
-            <div class="team-identity">
-              <span class="team-color" style="background:{t2.color}"></span>
-              <span class="team-name">{t2.name}</span>
-            </div>
-            <span class="team-score">
-              {#if has}{game.score2}{:else}&ndash;{/if}
-            </span>
-          </div>
+          <span class="team-score" class:score-active={has}>
+            {#if has}{game.score1}{:else}–{/if}
+          </span>
         </div>
 
-        {#if !has}
-          <div class="game-status">Upcoming</div>
-        {/if}
+        <div class="team-divider"></div>
+
+        <div class="team-row" class:is-winner={w2} class:is-loser={has && !w2}>
+          <div class="team-id">
+            <span class="team-bar" style="background:{t2.color}"></span>
+            <span class="team-name">{t2.name}</span>
+          </div>
+          <span class="team-score" class:score-active={has}>
+            {#if has}{game.score2}{:else}–{/if}
+          </span>
+        </div>
       </button>
     {/each}
   </div>
 {/if}
 
 <style>
-  /* --- Week strip --- */
   .week-strip-wrap {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
   }
 
   .week-strip {
     display: flex;
-    gap: 0.25rem;
-    padding: 0.75rem 1rem;
+    gap: 0.375rem;
+    padding: 0.75rem 1.25rem;
     overflow-x: auto;
     scrollbar-width: none;
-    -ms-overflow-style: none;
   }
 
   .week-strip::-webkit-scrollbar { display: none; }
@@ -173,12 +165,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.1rem;
+    gap: 0.05rem;
     width: 2.75rem;
-    padding: 0.5rem 0.25rem 0.4rem;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 0.75rem;
+    padding: 0.45rem 0.25rem 0.35rem;
+    background: var(--surface2);
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
@@ -186,101 +178,101 @@
     color: inherit;
   }
 
-  .week-chip:active { transform: scale(0.95); }
+  .week-chip:active { transform: scale(0.93); }
 
   .chip-num {
     font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1rem;
     line-height: 1;
     color: var(--text-muted);
   }
 
   .chip-label {
-    font-family: var(--font-display);
     font-size: 0.5rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.06em;
     color: var(--text-dim);
   }
 
   .chip-dot {
     position: absolute;
-    top: 0.3rem;
-    right: 0.4rem;
+    top: 0.25rem;
+    right: 0.35rem;
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: var(--green);
+    background: var(--accent);
   }
 
   .week-chip.selected {
-    background: var(--amber);
-    border-color: var(--amber);
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
   }
 
-  .week-chip.selected .chip-num { color: #0a0a0c; }
-  .week-chip.selected .chip-label { color: rgba(0,0,0,0.5); }
-  .week-chip.selected .chip-dot { background: #0a0a0c; }
+  .week-chip.selected .chip-num { color: white; }
+  .week-chip.selected .chip-label { color: rgba(255,255,255,0.7); }
+  .week-chip.selected .chip-dot { background: white; }
 
   .week-chip.current {
-    border-color: var(--amber);
+    border-color: var(--accent);
   }
 
-  .week-chip.current .chip-num { color: var(--amber); }
-  .week-chip.current .chip-label { color: var(--amber); }
+  .week-chip.current .chip-num { color: var(--accent); }
+  .week-chip.current .chip-label { color: var(--accent); }
 
-  /* --- Week info --- */
   .week-info {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem 0.5rem;
+  }
+
+  .week-info-left {
+    display: flex;
+    align-items: baseline;
     gap: 0.5rem;
-    padding: 0.875rem 1rem 0.375rem;
   }
 
   .week-title {
     font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 1.15rem;
     color: var(--text);
   }
 
-  .week-sep { color: var(--text-dim); }
-
   .week-dates {
     font-size: 0.8rem;
+    font-weight: 500;
     color: var(--text-muted);
   }
 
   .week-round {
-    margin-left: auto;
-    font-family: var(--font-display);
     font-size: 0.65rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    background: var(--amber-dim);
-    color: var(--amber);
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2rem;
+    background: var(--accent-bg);
+    color: var(--accent);
   }
 
-  /* --- Game cards --- */
   .games {
-    padding: 0.5rem 1rem 6rem;
+    padding: 0.5rem 1.25rem 6rem;
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: 0.75rem;
   }
 
   .game-card {
     display: block;
     width: 100%;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.875rem;
+    border: none;
+    border-radius: var(--radius);
     padding: 0;
     overflow: hidden;
     cursor: default;
@@ -289,68 +281,72 @@
     font-family: inherit;
     font-size: inherit;
     color: inherit;
+    box-shadow: var(--shadow-sm);
     animation: card-in 0.3s ease both;
   }
 
   @keyframes card-in {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .game-card.has-photo { cursor: pointer; }
   .game-card.has-photo:active { transform: scale(0.98); }
-  .game-card:hover { border-color: var(--border-hover); }
-  .game-card.has-photo:hover { border-color: rgba(245,158,11,0.3); }
+  .game-card:hover { box-shadow: var(--shadow-md); }
+  .game-card.has-photo:hover { box-shadow: var(--shadow-md), 0 0 0 2px var(--accent-light); }
 
-  .game-date {
+  .game-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 0.875rem;
-    border-bottom: 1px solid var(--border);
-    background: rgba(255,255,255,0.015);
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--surface2);
   }
 
-  .date-day {
+  .game-day {
     font-size: 0.7rem;
-    font-weight: 500;
-    color: var(--text-dim);
+    font-weight: 600;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
   }
 
-  .date-day.is-sat { color: var(--amber); }
+  .game-day.is-sat { color: var(--accent); }
 
   .photo-badge {
-    font-size: 0.65rem;
-    color: var(--text-dim);
-    opacity: 0.7;
+    font-size: 0.7rem;
+    opacity: 0.5;
   }
 
-  .matchup {
-    padding: 0.125rem 0;
+  .upcoming-tag {
+    margin-left: auto;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
   }
 
   .team-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.625rem 0.875rem;
+    padding: 0.75rem 1rem;
   }
 
-  .team-identity {
+  .team-divider {
+    height: 1px;
+    margin: 0 1rem;
+    background: var(--border);
+  }
+
+  .team-id {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
+    gap: 0.75rem;
   }
 
-  .team-color {
+  .team-bar {
     width: 4px;
     height: 1.75rem;
     border-radius: 2px;
@@ -358,15 +354,14 @@
   }
 
   .team-name {
-    font-family: var(--font-body);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.95rem;
     color: var(--text);
   }
 
   .team-score {
     font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1.5rem;
     color: var(--text-dim);
     min-width: 2.5rem;
@@ -374,22 +369,12 @@
     line-height: 1;
   }
 
-  .team-row.is-winner .team-name { color: #fff; }
-  .team-row.is-winner .team-score { color: #fff; }
-  .team-row.is-loser .team-name { color: var(--text-muted); }
-  .team-row.is-loser .team-score { color: var(--text-muted); }
+  .team-score.score-active { color: var(--text-secondary); }
 
-  .game-status {
-    text-align: center;
-    padding: 0.35rem;
-    font-family: var(--font-display);
-    font-size: 0.6rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-dim);
-    border-top: 1px solid var(--border);
-  }
+  .team-row.is-winner .team-name { color: var(--text); font-weight: 700; }
+  .team-row.is-winner .team-score { color: var(--accent); }
+  .team-row.is-loser .team-name { color: var(--text-muted); }
+  .team-row.is-loser .team-score { color: var(--text-dim); }
 
   @media (min-width: 640px) {
     .games {
