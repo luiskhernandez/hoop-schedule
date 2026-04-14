@@ -114,7 +114,7 @@
       >
         <div class="game-top">
           <span class="game-day" class:is-sat={game.day === 'saturday'}>
-            {fmtDate(game.date)}
+            {fmtDate(game.date)}{#if game.time} · {game.time}{/if}
           </span>
           {#if hasPhoto}
             <span class="photo-badge">&#128247;</span>
