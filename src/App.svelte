@@ -75,6 +75,20 @@
           </div>
         {/if}
       </div>
+
+      <!-- Desktop tabs in header -->
+      <nav class="desktop-nav">
+        {#each tabs as tab}
+          <button
+            class="desktop-tab"
+            class:active={currentTab === tab.id}
+            onclick={() => currentTab = tab.id}
+            type="button"
+          >
+            {tab.label}
+          </button>
+        {/each}
+      </nav>
     </div>
   </header>
 
@@ -90,6 +104,7 @@
     {/if}
   </main>
 
+  <!-- Mobile bottom nav -->
   <nav class="bottom-nav">
     {#each tabs as tab}
       <button
@@ -153,6 +168,7 @@
   .header-inner {
     display: flex;
     align-items: center;
+    justify-content: space-between;
   }
 
   .brand {
@@ -189,6 +205,38 @@
     margin-top: 0.1rem;
   }
 
+  /* Desktop nav — hidden on mobile */
+  .desktop-nav {
+    display: none;
+    gap: 0.25rem;
+    padding: 0.2rem;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+  }
+
+  .desktop-tab {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .desktop-tab:hover {
+    color: var(--text-secondary);
+  }
+
+  .desktop-tab.active {
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+
   .content {
     flex: 1;
     overflow-y: auto;
@@ -196,6 +244,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Mobile bottom nav */
   .bottom-nav {
     flex-shrink: 0;
     display: flex;
@@ -249,7 +298,22 @@
     letter-spacing: 0.02em;
   }
 
-  @media (min-width: 640px) {
-    .shell { max-width: 48rem; }
+  /* Desktop: show header tabs, hide bottom nav, widen shell */
+  @media (min-width: 768px) {
+    .shell {
+      max-width: 56rem;
+    }
+
+    .header {
+      padding: 0.875rem 2rem;
+    }
+
+    .desktop-nav {
+      display: flex;
+    }
+
+    .bottom-nav {
+      display: none;
+    }
   }
 </style>

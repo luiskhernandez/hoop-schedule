@@ -383,4 +383,13 @@
       gap: 0.75rem;
     }
   }
+
+  @media (min-width: 768px) {
+    .week-strip { padding: 0.75rem 2rem; }
+    .week-info { padding: 1rem 2rem 0.5rem; }
+    .games { padding: 0.5rem 2rem 2rem; }
+    .games {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
 </style>

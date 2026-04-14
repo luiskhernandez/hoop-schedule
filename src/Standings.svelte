@@ -76,6 +76,10 @@
 <style>
   .page { padding: 0 1.25rem 6rem; }
 
+  @media (min-width: 768px) {
+    .page { padding: 0 2rem 2rem; max-width: 40rem; margin: 0 auto; }
+  }
+
   .section-head {
     display: flex;
     align-items: baseline;
