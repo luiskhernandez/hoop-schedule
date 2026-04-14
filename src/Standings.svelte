@@ -77,7 +77,7 @@
   .page { padding: 0 1.25rem 6rem; }
 
   @media (min-width: 768px) {
-    .page { padding: 0 2rem 2rem; max-width: 40rem; margin: 0 auto; }
+    .page { padding: 1rem 2.5rem 2rem; max-width: 44rem; margin: 0 auto; }
   }
 
   .section-head {

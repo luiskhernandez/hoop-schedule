@@ -139,12 +139,11 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    max-width: 30rem;
-    margin: 0 auto;
     width: 100%;
     background: var(--bg);
   }
 
+  /* --- Header --- */
   .header {
     flex-shrink: 0;
     background: var(--surface);
@@ -227,6 +226,7 @@
     box-shadow: var(--shadow-sm);
   }
 
+  /* --- Content --- */
   .content {
     flex: 1;
     overflow-y: auto;
@@ -234,7 +234,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Mobile bottom nav */
+  /* --- Mobile bottom nav --- */
   .bottom-nav {
     flex-shrink: 0;
     display: flex;
@@ -288,14 +288,17 @@
     letter-spacing: 0.02em;
   }
 
-  /* Desktop: show header tabs, hide bottom nav, widen shell */
+  /* --- Desktop --- */
   @media (min-width: 768px) {
-    .shell {
-      max-width: 56rem;
+    .header {
+      padding: 0.875rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      box-shadow: none;
     }
 
-    .header {
-      padding: 0.875rem 2rem;
+    .header-inner {
+      max-width: 72rem;
+      margin: 0 auto;
     }
 
     .desktop-nav {

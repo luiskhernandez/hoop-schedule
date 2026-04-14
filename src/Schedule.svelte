@@ -441,10 +441,27 @@
   }
 
   @media (min-width: 768px) {
-    .week-strip { padding: 0.75rem 2rem; }
-    .week-info { padding: 1rem 2rem 0.5rem; }
-    .games { padding: 0.5rem 2rem 2rem; }
+    .week-strip-wrap {
+      border-bottom: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .week-strip {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 0.75rem 2.5rem;
+    }
+
+    .week-info {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 1rem 2.5rem 0.5rem;
+    }
+
     .games {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 0.5rem 2.5rem 2rem;
       grid-template-columns: repeat(3, 1fr);
     }
   }
