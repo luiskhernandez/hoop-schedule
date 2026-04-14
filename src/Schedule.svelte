@@ -48,17 +48,26 @@
 
 <div class="week-strip-wrap">
   <div class="week-strip">
-    {#each weeks as [w]}
+    {#each weeks as [w], idx}
       {@const wn = Number(w)}
       {@const isCurrent = wn === currentWeek}
       {@const isSelected = wn === selectedWeek}
       {@const wGames = weeks.find(([ww]) => Number(ww) === wn)?.[1] || []}
       {@const hasResults = wGames.some(g => g.score1 !== null)}
+      {@const round = wGames[0]?.round}
+      {@const prevRound = idx > 0 ? (weeks[idx - 1][1][0]?.round) : round}
+
+      {#if round !== prevRound}
+        <div class="round-divider">
+          <span class="round-divider-label">R{round}</span>
+        </div>
+      {/if}
 
       <button
         class="week-chip"
         class:selected={isSelected}
         class:current={isCurrent && !isSelected}
+        class:round2={round === 2}
         onclick={() => selectedWeek = wn}
         type="button"
       >
@@ -83,7 +92,7 @@
       <span class="week-title">Week {selectedWeek}</span>
       <span class="week-dates">{shortDate(satDate)} – {shortDate(sunDate)}</span>
     </div>
-    <span class="week-round">Round {selectedGames[0].round}</span>
+    <span class="week-round" class:r2={selectedGames[0].round === 2}>Round {selectedGames[0].round}</span>
   </div>
 
   <div class="games">
@@ -180,6 +189,48 @@
 
   .week-chip:active { transform: scale(0.93); }
 
+  .week-chip.round2 {
+    background: rgba(99, 102, 241, 0.06);
+    border-color: rgba(99, 102, 241, 0.12);
+  }
+
+  .week-chip.round2 .chip-num { color: #818cf8; }
+
+  .week-chip.round2.selected {
+    background: #6366f1;
+    border-color: #6366f1;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  }
+
+  .week-chip.round2.selected .chip-num { color: white; }
+  .week-chip.round2.selected .chip-label { color: rgba(255,255,255,0.7); }
+  .week-chip.round2.selected .chip-dot { background: white; }
+
+  .week-chip.round2.current {
+    border-color: #6366f1;
+  }
+
+  .week-chip.round2.current .chip-num { color: #6366f1; }
+  .week-chip.round2.current .chip-label { color: #6366f1; }
+
+  .round-divider {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 0.25rem;
+  }
+
+  .round-divider-label {
+    font-size: 0.55rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6366f1;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+  }
+
   .chip-num {
     font-family: var(--font-display);
     font-weight: 800;
@@ -258,6 +309,11 @@
     border-radius: 2rem;
     background: var(--accent-bg);
     color: var(--accent);
+  }
+
+  .week-round.r2 {
+    background: rgba(99, 102, 241, 0.08);
+    color: #6366f1;
   }
 
   .games {
