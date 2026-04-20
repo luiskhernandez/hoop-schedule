@@ -89,7 +89,7 @@
               <span class="stat-num">{row.pts}</span>
               <span class="stat-lbl">PTS</span>
             </div>
-            <div class="stat-item">
+            <div class="stat-item secondary">
               <span class="stat-num">{row.gp}</span>
               <span class="stat-lbl">GP</span>
             </div>
@@ -97,15 +97,15 @@
               <span class="stat-num">{row.w}</span>
               <span class="stat-lbl">W</span>
             </div>
-            <div class="stat-item">
+            <div class="stat-item secondary">
               <span class="stat-num">{row.wo}</span>
               <span class="stat-lbl">WO</span>
             </div>
-            <div class="stat-item">
+            <div class="stat-item secondary">
               <span class="stat-num">{row.pf}</span>
               <span class="stat-lbl">PF</span>
             </div>
-            <div class="stat-item">
+            <div class="stat-item secondary">
               <span class="stat-num">{row.pa}</span>
               <span class="stat-lbl">PA</span>
             </div>
@@ -280,6 +280,10 @@
     font-size: 1.05rem;
   }
   .pts-item .stat-lbl { color: var(--text-secondary); }
+
+  @media (max-width: 767px) {
+    .stat-item.secondary { display: none; }
+  }
 
   .footnote {
     font-size: 0.7rem;
