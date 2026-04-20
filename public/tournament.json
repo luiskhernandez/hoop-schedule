@@ -1,12 +1,12 @@
 {
   "name": "Basketball Tournament 2026",
   "teams": [
-    { "id": 1, "name": "Wolves", "short": "WOL", "color": "#6B7280" },
-    { "id": 2, "name": "Manchester", "short": "MAN", "color": "#DC2626" },
-    { "id": 3, "name": "Thunder", "short": "THU", "color": "#2563EB" },
-    { "id": 4, "name": "Killami", "short": "KIL", "color": "#059669" },
-    { "id": 5, "name": "Chiguiros", "short": "CHI", "color": "#D97706" },
-    { "id": 6, "name": "Titanes", "short": "TTN", "color": "#7C3AED" }
+    { "id": 1, "name": "Wolves", "short": "WOL", "color": "#6B7280", "logo": "logos/wolves.jpeg" },
+    { "id": 2, "name": "Manchester", "short": "MAN", "color": "#6CABDD", "logo": "logos/manchester.jpeg" },
+    { "id": 3, "name": "Thunder", "short": "THU", "color": "#0a0a0a" },
+    { "id": 4, "name": "Killami", "short": "KIL", "color": "#ffffff", "logo": "logos/killami.jpeg" },
+    { "id": 5, "name": "Chiguiros", "short": "CHI", "color": "#0a0a0a", "color2": "#facc15", "logo": "logos/chiguiros.jpeg" },
+    { "id": 6, "name": "Titanes", "short": "TTN", "color": "#c53030", "logo": "logos/titanes.png" }
   ],
   "regularSeason": [
     { "id": "RS-01", "round": 1, "week": 1, "date": "2026-04-11", "day": "saturday", "time": "3:30 PM",  "team1": 2, "team2": 3, "score1": 24, "score2": 46 },

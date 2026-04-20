@@ -1,5 +1,6 @@
 <script>
   import { computeStandings } from './standings.js';
+  import Crest from './Crest.svelte';
 
   let { games, regularSeason, teams, photoMap, openPhoto } = $props();
 
@@ -41,7 +42,7 @@
       if (id in cache) return cache[id];
       const g = byId[id];
       if (!g) { cache[id] = null; return null; }
-      cache[id] = null; // guard against cycles
+      cache[id] = null;
       const team1 = g.team1 ?? resolveRef(g.source1);
       const team2 = g.team2 ?? resolveRef(g.source2);
       cache[id] = { ...g, team1, team2 };
@@ -62,7 +63,6 @@
     return `${fmtDate(unique[0])} – ${fmtDate(unique[unique.length - 1])}`;
   }
 
-  // Readable labels for bracket rounds
   const roundLabels = {
     'winners_qf': 'Quarterfinals',
     'winners_sf': 'Semifinals',
@@ -74,7 +74,6 @@
     'grand_final': 'Grand Final',
   };
 
-  // Badge type for each round
   const roundBracket = {
     'winners_qf': 'winners',
     'winners_sf': 'winners',
@@ -86,17 +85,15 @@
     'grand_final': 'final',
   };
 
-  // Group games into playoff weekends by date proximity
+  // Mobile: group by weekend
   let weekends = $derived.by(() => {
     const sorted = [...games].sort((a, b) => a.date.localeCompare(b.date));
     const groups = [];
     let current = null;
 
     for (const g of sorted) {
-      const sat = g.date;
-      // Group games within the same weekend (within 1 day)
-      if (!current || daysBetween(current.anchor, sat) > 1) {
-        current = { anchor: sat, games: [] };
+      if (!current || daysBetween(current.anchor, g.date) > 1) {
+        current = { anchor: g.date, games: [] };
         groups.push(current);
       }
       current.games.push(g);
@@ -107,7 +104,88 @@
   function daysBetween(a, b) {
     return Math.abs(new Date(a + 'T12:00:00') - new Date(b + 'T12:00:00')) / 86400000;
   }
+
+  // Desktop: structure by bracket
+  let bracket = $derived.by(() => {
+    const byId = (id) => games.find(g => g.id === id);
+    const byIds = (ids) => ids.map(byId).filter(Boolean);
+    return {
+      winners: [
+        { label: 'Quarterfinals', games: byIds(['WQF1', 'WQF2']) },
+        { label: 'Semifinals', games: byIds(['WSF1', 'WSF2']) },
+        { label: 'Winners Final', games: byIds(['WF']) },
+      ],
+      losers: [
+        { label: 'Round 1', games: byIds(['LR1']) },
+        { label: 'Round 2', games: byIds(['LR2']) },
+        { label: 'Round 3', games: byIds(['LR3']) },
+        { label: 'Losers Final', games: byIds(['LSF']) },
+      ],
+      grand: byIds(['GF1', 'GF2']),
+    };
+  });
 </script>
+
+{#snippet poCard(game)}
+  {@const resolved = resolvedById[game.id] ?? game}
+  {@const t1 = resolved.team1 ? team(resolved.team1) : null}
+  {@const t2 = resolved.team2 ? team(resolved.team2) : null}
+  {@const has = game.score1 !== null && game.score2 !== null}
+  {@const w1 = has && game.score1 > game.score2}
+  {@const w2 = has && game.score2 > game.score1}
+  {@const hasPhoto = !!photoMap[game.id]}
+  {@const br = roundBracket[game.round]}
+  {@const projected1 = game.team1 == null && !!game.source1}
+  {@const projected2 = game.team2 == null && !!game.source2}
+
+  <button
+    class="po-card"
+    class:has-photo={hasPhoto}
+    onclick={() => hasPhoto && openPhoto(game.id)}
+    type="button"
+  >
+    <div class="po-top">
+      <span class="bracket-tag {br}">{roundLabels[game.round]}</span>
+      <span class="po-date">{fmtDate(game.date)}</span>
+    </div>
+
+    <div class="po-team" class:is-winner={w1} class:is-loser={has && !w1}>
+      {#if t1}
+        <Crest team={t1} />
+        <div class="po-team-info">
+          <span class="po-name">{t1.name}</span>
+          {#if projected1}
+            <span class="po-source-sub">{game.source1}</span>
+          {/if}
+        </div>
+      {:else}
+        <span class="po-source">{game.source1}</span>
+      {/if}
+      <span class="po-score">{has ? game.score1 : '–'}</span>
+    </div>
+
+    <div class="po-divider"></div>
+
+    <div class="po-team" class:is-winner={w2} class:is-loser={has && !w2}>
+      {#if t2}
+        <Crest team={t2} />
+        <div class="po-team-info">
+          <span class="po-name">{t2.name}</span>
+          {#if projected2}
+            <span class="po-source-sub">{game.source2}</span>
+          {/if}
+        </div>
+      {:else}
+        <span class="po-source">{game.source2}</span>
+      {/if}
+      <span class="po-score">{has ? game.score2 : '–'}</span>
+    </div>
+
+    {#if hasPhoto}
+      <div class="po-footer">&#128247; View scoresheet</div>
+    {/if}
+  </button>
+{/snippet}
 
 <div class="page">
   <div class="section-head">
@@ -136,6 +214,7 @@
     </div>
   {/if}
 
+  <!-- Mobile timeline -->
   <div class="timeline">
     {#each weekends as weekend, wi}
       {@const dates = weekend.games.map(g => g.date)}
@@ -149,75 +228,76 @@
 
         <div class="weekend-games">
           {#each weekend.games as game}
-            {@const resolved = resolvedById[game.id] ?? game}
-            {@const t1 = resolved.team1 ? team(resolved.team1) : null}
-            {@const t2 = resolved.team2 ? team(resolved.team2) : null}
-            {@const has = game.score1 !== null && game.score2 !== null}
-            {@const w1 = has && game.score1 > game.score2}
-            {@const w2 = has && game.score2 > game.score1}
-            {@const hasPhoto = !!photoMap[game.id]}
-            {@const bracket = roundBracket[game.round]}
-            {@const projected1 = game.team1 == null && !!game.source1}
-            {@const projected2 = game.team2 == null && !!game.source2}
-
-            <button
-              class="po-card"
-              class:has-photo={hasPhoto}
-              onclick={() => hasPhoto && openPhoto(game.id)}
-              type="button"
-            >
-              <div class="po-top">
-                <span class="bracket-tag {bracket}">{roundLabels[game.round]}</span>
-              </div>
-
-              <div class="po-team" class:is-winner={w1} class:is-loser={has && !w1}>
-                {#if t1}
-                  <span class="po-bar" style="background:{t1.color}"></span>
-                  <div class="po-team-info">
-                    <span class="po-name">{t1.name}</span>
-                    {#if projected1}
-                      <span class="po-source-sub">{game.source1}</span>
-                    {/if}
-                  </div>
-                {:else}
-                  <span class="po-source">{game.source1}</span>
-                {/if}
-                <span class="po-score">{has ? game.score1 : '–'}</span>
-              </div>
-
-              <div class="po-divider"></div>
-
-              <div class="po-team" class:is-winner={w2} class:is-loser={has && !w2}>
-                {#if t2}
-                  <span class="po-bar" style="background:{t2.color}"></span>
-                  <div class="po-team-info">
-                    <span class="po-name">{t2.name}</span>
-                    {#if projected2}
-                      <span class="po-source-sub">{game.source2}</span>
-                    {/if}
-                  </div>
-                {:else}
-                  <span class="po-source">{game.source2}</span>
-                {/if}
-                <span class="po-score">{has ? game.score2 : '–'}</span>
-              </div>
-
-              {#if hasPhoto}
-                <div class="po-footer">&#128247; View scoresheet</div>
-              {/if}
-            </button>
+            {@render poCard(game)}
           {/each}
         </div>
       </div>
     {/each}
   </div>
+
+  <!-- Desktop bracket view -->
+  <div class="bracket-view">
+    <section class="bracket bracket-winners">
+      <header class="bracket-header">
+        <span class="bracket-rule winners-rule"></span>
+        <h3 class="bracket-title">Winners Bracket</h3>
+      </header>
+      <div class="rounds" style="--cols: 3">
+        {#each bracket.winners as round}
+          <div class="round">
+            <span class="round-label">{round.label}</span>
+            <div class="round-games">
+              {#each round.games as game}
+                {@render poCard(game)}
+              {/each}
+            </div>
+          </div>
+        {/each}
+      </div>
+    </section>
+
+    <section class="bracket bracket-losers">
+      <header class="bracket-header">
+        <span class="bracket-rule losers-rule"></span>
+        <h3 class="bracket-title">Losers Bracket</h3>
+      </header>
+      <div class="rounds" style="--cols: 4">
+        {#each bracket.losers as round}
+          <div class="round">
+            <span class="round-label">{round.label}</span>
+            <div class="round-games">
+              {#each round.games as game}
+                {@render poCard(game)}
+              {/each}
+            </div>
+          </div>
+        {/each}
+      </div>
+    </section>
+
+    <section class="bracket bracket-grand">
+      <header class="bracket-header">
+        <span class="bracket-rule grand-rule"></span>
+        <h3 class="bracket-title">Grand Final</h3>
+      </header>
+      <div class="grand-games">
+        {#each bracket.grand as game}
+          {@render poCard(game)}
+        {/each}
+      </div>
+    </section>
+  </div>
 </div>
 
 <style>
-  .page { padding: 0 1.25rem 6rem; }
+  .page { padding: 0 1.25rem 6rem; --crest-size: 32px; }
 
   @media (min-width: 768px) {
     .page { padding: 1rem 2.5rem 2rem; max-width: 44rem; margin: 0 auto; }
+  }
+
+  @media (min-width: 1024px) {
+    .page { max-width: 72rem; --crest-size: 28px; }
   }
 
   .section-head {
@@ -303,11 +383,22 @@
     font-weight: 700;
   }
 
-  /* --- Timeline --- */
+  /* --- Timeline (mobile/tablet default) --- */
   .timeline {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+  }
+
+  .bracket-view { display: none; }
+
+  @media (min-width: 1024px) {
+    .timeline { display: none; }
+    .bracket-view {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
   }
 
   .weekend {
@@ -347,6 +438,74 @@
     gap: 0.625rem;
   }
 
+  /* --- Bracket sections (desktop) --- */
+  .bracket {
+    animation: fade-up 0.3s ease both;
+  }
+
+  .bracket-header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .bracket-rule {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 3px;
+    border-radius: 2px;
+  }
+  .winners-rule { background: var(--green); }
+  .losers-rule { background: var(--red); }
+  .grand-rule { background: var(--warning); }
+
+  .bracket-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .rounds {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 3), 1fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .round {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .round-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-bottom: 0.3rem;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .round-games {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .grand-games {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 28rem));
+    gap: 1rem;
+    justify-content: center;
+  }
+
   /* --- Card --- */
   .po-card {
     display: block;
@@ -373,15 +532,25 @@
     background: var(--surface2);
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .po-date {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
   }
 
   .bracket-tag {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     padding: 0.15rem 0.5rem;
     border-radius: 2rem;
+    white-space: nowrap;
   }
 
   .bracket-tag.winners {
@@ -402,39 +571,35 @@
   .po-team {
     display: flex;
     align-items: center;
-    padding: 0.625rem 0.875rem;
-    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    gap: 0.55rem;
   }
 
   .po-divider {
     height: 1px;
-    margin: 0 0.875rem;
+    margin: 0 0.75rem;
     background: var(--border);
-  }
-
-  .po-bar {
-    width: 4px;
-    height: 1.5rem;
-    border-radius: 2px;
-    flex-shrink: 0;
   }
 
   .po-team-info {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
+    gap: 0.05rem;
     min-width: 0;
   }
 
   .po-name {
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .po-source-sub {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 500;
     color: var(--text-dim);
     letter-spacing: 0.01em;
@@ -442,7 +607,7 @@
 
   .po-source {
     flex: 1;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 500;
     color: var(--text-dim);
   }
@@ -450,9 +615,9 @@
   .po-score {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     color: var(--text-dim);
-    min-width: 2rem;
+    min-width: 1.75rem;
     text-align: right;
   }
 
@@ -462,11 +627,19 @@
   .po-team.is-loser .po-score { color: var(--text-dim); }
 
   .po-footer {
-    padding: 0.35rem 0.875rem;
+    padding: 0.3rem 0.875rem;
     background: var(--surface2);
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 600;
     color: var(--text-muted);
     text-align: center;
+  }
+
+  /* On desktop, the mobile-only date inside po-top is redundant with round columns */
+  @media (min-width: 1024px) {
+    .po-top { padding: 0.35rem 0.75rem; }
+    .po-team { padding: 0.5rem 0.75rem; gap: 0.5rem; }
+    .po-score { font-size: 1rem; min-width: 1.5rem; }
+    .po-name { font-size: 0.8rem; }
   }
 </style>

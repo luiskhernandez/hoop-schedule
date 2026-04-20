@@ -1,4 +1,6 @@
 <script>
+  import Crest from './Crest.svelte';
+
   let { games, teams, photoMap, openPhoto } = $props();
 
   function team(id) {
@@ -41,9 +43,27 @@
     }
   });
 
-  let selectedGames = $derived(
-    weeks.find(([w]) => Number(w) === selectedWeek)?.[1] || []
-  );
+  let hasInitialScrolled = $state(false);
+
+  $effect(() => {
+    if (hasInitialScrolled || currentWeek === null) return;
+    if (typeof window === 'undefined') return;
+    if (!window.matchMedia('(min-width: 1024px)').matches) return;
+
+    hasInitialScrolled = true;
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`week-${currentWeek}`);
+      if (el) el.scrollIntoView({ behavior: 'instant', block: 'start' });
+    });
+  });
+
+  function handleWeekClick(wn) {
+    selectedWeek = wn;
+    if (typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches) {
+      const el = document.getElementById(`week-${wn}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 </script>
 
 <div class="week-strip-wrap">
@@ -68,7 +88,7 @@
         class:selected={isSelected}
         class:current={isCurrent && !isSelected}
         class:round2={round === 2}
-        onclick={() => selectedWeek = wn}
+        onclick={() => handleWeekClick(wn)}
         type="button"
       >
         <span class="chip-num">{w}</span>
@@ -83,72 +103,83 @@
   </div>
 </div>
 
-{#if selectedGames.length > 0}
-  {@const satDate = selectedGames.find(g => g.day === 'saturday')?.date}
-  {@const sunDate = selectedGames.find(g => g.day === 'sunday')?.date}
+<div class="schedule-body">
+  {#each weeks as [w, wGames]}
+    {@const wn = Number(w)}
+    {@const satDate = wGames.find(g => g.day === 'saturday')?.date}
+    {@const sunDate = wGames.find(g => g.day === 'sunday')?.date}
+    {@const round = wGames[0]?.round}
 
-  <div class="week-info">
-    <div class="week-info-left">
-      <span class="week-title">Week {selectedWeek}</span>
-      <span class="week-dates">{shortDate(satDate)} – {shortDate(sunDate)}</span>
-    </div>
-    <span class="week-round" class:r2={selectedGames[0].round === 2}>Round {selectedGames[0].round}</span>
-  </div>
-
-  <div class="games">
-    {#each selectedGames as game, idx}
-      {@const t1 = team(game.team1)}
-      {@const t2 = team(game.team2)}
-      {@const has = game.score1 !== null && game.score2 !== null}
-      {@const w1 = has && game.score1 > game.score2}
-      {@const w2 = has && game.score2 > game.score1}
-      {@const hasPhoto = !!photoMap[game.id]}
-
-      <button
-        class="game-card"
-        class:has-photo={hasPhoto}
-        class:played={has}
-        onclick={() => hasPhoto && openPhoto(game.id)}
-        type="button"
-        style="animation-delay: {idx * 60}ms"
-      >
-        <div class="game-top">
-          <span class="game-day" class:is-sat={game.day === 'saturday'}>
-            {fmtDate(game.date)}{#if game.time} · {game.time}{/if}
-          </span>
-          {#if hasPhoto}
-            <span class="photo-badge">&#128247;</span>
-          {/if}
-          {#if !has}
-            <span class="upcoming-tag">Upcoming</span>
-          {/if}
+    <section
+      class="week-section"
+      class:is-selected={wn === selectedWeek}
+      class:is-current={wn === currentWeek}
+      id="week-{wn}"
+    >
+      <div class="week-info">
+        <div class="week-info-left">
+          <span class="week-title">Week {wn}</span>
+          <span class="week-dates">{shortDate(satDate)} – {shortDate(sunDate)}</span>
         </div>
+        <span class="week-round" class:r2={round === 2}>Round {round}</span>
+      </div>
 
-        <div class="team-row" class:is-winner={w1} class:is-loser={has && !w1}>
-          <div class="team-id">
-            <span class="team-bar" style="background:{t1.color}"></span>
-            <span class="team-name">{t1.name}</span>
-          </div>
-          <span class="team-score" class:score-active={has}>
-            {#if has}{game.score1}{:else}–{/if}
-          </span>
-        </div>
+      <div class="games">
+        {#each wGames as game, idx}
+          {@const t1 = team(game.team1)}
+          {@const t2 = team(game.team2)}
+          {@const has = game.score1 !== null && game.score2 !== null}
+          {@const w1 = has && game.score1 > game.score2}
+          {@const w2 = has && game.score2 > game.score1}
+          {@const hasPhoto = !!photoMap[game.id]}
 
-        <div class="team-divider"></div>
+          <button
+            class="game-card"
+            class:has-photo={hasPhoto}
+            class:played={has}
+            onclick={() => hasPhoto && openPhoto(game.id)}
+            type="button"
+            style="animation-delay: {idx * 60}ms"
+          >
+            <div class="game-top">
+              <span class="game-day" class:is-sat={game.day === 'saturday'}>
+                {fmtDate(game.date)}{#if game.time} · {game.time}{/if}
+              </span>
+              {#if hasPhoto}
+                <span class="photo-badge">&#128247;</span>
+              {/if}
+              {#if !has}
+                <span class="upcoming-tag">Upcoming</span>
+              {/if}
+            </div>
 
-        <div class="team-row" class:is-winner={w2} class:is-loser={has && !w2}>
-          <div class="team-id">
-            <span class="team-bar" style="background:{t2.color}"></span>
-            <span class="team-name">{t2.name}</span>
-          </div>
-          <span class="team-score" class:score-active={has}>
-            {#if has}{game.score2}{:else}–{/if}
-          </span>
-        </div>
-      </button>
-    {/each}
-  </div>
-{/if}
+            <div class="team-row" class:is-winner={w1} class:is-loser={has && !w1}>
+              <div class="team-id">
+                <Crest team={t1} />
+                <span class="team-name">{t1.name}</span>
+              </div>
+              <span class="team-score" class:score-active={has}>
+                {#if has}{game.score1}{:else}–{/if}
+              </span>
+            </div>
+
+            <div class="team-divider"></div>
+
+            <div class="team-row" class:is-winner={w2} class:is-loser={has && !w2}>
+              <div class="team-id">
+                <Crest team={t2} />
+                <span class="team-name">{t2.name}</span>
+              </div>
+              <span class="team-score" class:score-active={has}>
+                {#if has}{game.score2}{:else}–{/if}
+              </span>
+            </div>
+          </button>
+        {/each}
+      </div>
+    </section>
+  {/each}
+</div>
 
 <style>
   .week-strip-wrap {
@@ -274,6 +305,25 @@
   .week-chip.current .chip-num { color: var(--accent); }
   .week-chip.current .chip-label { color: var(--accent); }
 
+  /* === Week sections === */
+  .schedule-body {
+    --crest-size: 36px;
+  }
+
+  .week-section {
+    animation: fade-up 0.35s ease both;
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile: only show selected week */
+  @media (max-width: 1023px) {
+    .week-section:not(.is-selected) { display: none; }
+  }
+
   .week-info {
     display: flex;
     align-items: center;
@@ -317,7 +367,7 @@
   }
 
   .games {
-    padding: 0.5rem 1.25rem 6rem;
+    padding: 0.5rem 1.25rem 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -402,13 +452,6 @@
     gap: 0.75rem;
   }
 
-  .team-bar {
-    width: 4px;
-    height: 1.75rem;
-    border-radius: 2px;
-    flex-shrink: 0;
-  }
-
   .team-name {
     font-weight: 600;
     font-size: 0.95rem;
@@ -461,8 +504,29 @@
     .games {
       max-width: 72rem;
       margin: 0 auto;
-      padding: 0.5rem 2.5rem 2rem;
+      padding: 0.5rem 2.5rem 1.5rem;
       grid-template-columns: repeat(3, 1fr);
     }
+  }
+
+  /* === Desktop: show all weeks stacked, each separated === */
+  @media (min-width: 1024px) {
+    .schedule-body { --crest-size: 44px; }
+
+    .week-section {
+      padding-top: 1.5rem;
+      scroll-margin-top: 6rem;
+    }
+
+    .week-section + .week-section {
+      border-top: 1px solid var(--border);
+    }
+
+    .week-section.is-current .week-title {
+      color: var(--accent);
+    }
+
+    .team-name { font-size: 1rem; }
+    .team-score { font-size: 1.75rem; }
   }
 </style>

@@ -1,14 +1,21 @@
 @font-face {
-  font-family: 'Plus Jakarta Sans';
-  src: url('/fonts/jakarta.woff2') format('woff2');
-  font-weight: 400 800;
+  font-family: 'Satoshi';
+  src: url('/fonts/satoshi.woff2') format('woff2');
+  font-weight: 300 900;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Anybody';
-  src: url('/fonts/anybody.woff2') format('woff2');
-  font-weight: 500 900;
+  font-family: 'Barlow Condensed';
+  src: url('/fonts/barlow-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  src: url('/fonts/barlow-800.woff2') format('woff2');
+  font-weight: 800;
   font-display: swap;
 }
 
@@ -80,8 +87,8 @@
   /* Radii / typography / environment */
   --radius: 1rem;
   --radius-sm: 0.625rem;
-  --font-display: 'Anybody', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Barlow Condensed', 'Oswald', 'Impact', sans-serif;
+  --font-body: 'Satoshi', system-ui, sans-serif;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
