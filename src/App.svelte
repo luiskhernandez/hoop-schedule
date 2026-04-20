@@ -2,6 +2,7 @@
   import Schedule from './Schedule.svelte';
   import Standings from './Standings.svelte';
   import Playoffs from './Playoffs.svelte';
+  import Rules from './Rules.svelte';
   import Lightbox from './Lightbox.svelte';
   import Splash from './Splash.svelte';
 
@@ -71,6 +72,7 @@
     { id: 'schedule', label: 'Games', icon: 'calendar' },
     { id: 'standings', label: 'Standings', icon: 'trophy' },
     { id: 'playoffs', label: 'Playoffs', icon: 'bracket' },
+    { id: 'rules', label: 'Rules', icon: 'info' },
   ];
 
   const base = import.meta.env.BASE_URL;
@@ -182,6 +184,8 @@
         <Standings games={tournament.regularSeason} teams={tournament.teams} />
       {:else if currentTab === 'playoffs'}
         <Playoffs games={tournament.playoffs} regularSeason={tournament.regularSeason} teams={tournament.teams} {photoMap} {openPhoto} />
+      {:else if currentTab === 'rules'}
+        <Rules />
       {/if}
     {/if}
   </main>
@@ -215,6 +219,10 @@
               <path d="M20 4v6a2 2 0 01-2 2h-2"/>
               <path d="M20 20v-6a2 2 0 00-2-2h-2"/>
               <line x1="8" y1="12" x2="16" y2="12"/>
+            {:else if tab.icon === 'info'}
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
             {/if}
           </svg>
         </div>
