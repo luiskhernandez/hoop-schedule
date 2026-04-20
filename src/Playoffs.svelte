@@ -1,9 +1,56 @@
 <script>
-  let { games, teams, photoMap, openPhoto } = $props();
+  import { computeStandings } from './standings.js';
+
+  let { games, regularSeason, teams, photoMap, openPhoto } = $props();
 
   function team(id) {
     return teams.find(t => t.id === id);
   }
+
+  let rsPlayed = $derived(regularSeason.filter(g => g.score1 !== null && g.score2 !== null).length);
+  let rsTotal = $derived(regularSeason.length);
+  let isProjection = $derived(rsPlayed > 0 && rsPlayed < rsTotal);
+
+  let resolvedById = $derived.by(() => {
+    const standings = computeStandings(regularSeason, teams);
+    const seeds = standings.map(r => r.team.id);
+    const byId = Object.fromEntries(games.map(g => [g.id, g]));
+    const cache = {};
+
+    function resolveRef(src) {
+      if (!src) return null;
+      const seedM = src.match(/^Seed #(\d+)$/);
+      if (seedM) {
+        const idx = parseInt(seedM[1], 10) - 1;
+        return seeds[idx] ?? null;
+      }
+      const winM = src.match(/^Winner (\w+)$/);
+      const losM = src.match(/^Loser (\w+)$/);
+      const ref = winM || losM;
+      if (ref) {
+        const target = resolve(ref[1]);
+        if (!target || target.score1 == null || target.score2 == null) return null;
+        const winner = target.score1 > target.score2 ? target.team1 : target.team2;
+        const loser = target.score1 > target.score2 ? target.team2 : target.team1;
+        return winM ? winner : loser;
+      }
+      return null;
+    }
+
+    function resolve(id) {
+      if (id in cache) return cache[id];
+      const g = byId[id];
+      if (!g) { cache[id] = null; return null; }
+      cache[id] = null; // guard against cycles
+      const team1 = g.team1 ?? resolveRef(g.source1);
+      const team2 = g.team2 ?? resolveRef(g.source2);
+      cache[id] = { ...g, team1, team2 };
+      return cache[id];
+    }
+
+    for (const g of games) resolve(g.id);
+    return cache;
+  });
 
   function fmtDate(dateStr) {
     return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -76,6 +123,19 @@
 
   <p class="format-note">Lose twice = eliminated &middot; Seeds #1 & #2 get byes to semis</p>
 
+  {#if isProjection}
+    <div class="projection-banner">
+      <svg class="proj-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span class="proj-text">
+        <strong>Projected bracket</strong> &middot; based on current standings ({rsPlayed}/{rsTotal} games played). Seeds may change.
+      </span>
+    </div>
+  {/if}
+
   <div class="timeline">
     {#each weekends as weekend, wi}
       {@const dates = weekend.games.map(g => g.date)}
@@ -89,13 +149,16 @@
 
         <div class="weekend-games">
           {#each weekend.games as game}
-            {@const t1 = game.team1 ? team(game.team1) : null}
-            {@const t2 = game.team2 ? team(game.team2) : null}
+            {@const resolved = resolvedById[game.id] ?? game}
+            {@const t1 = resolved.team1 ? team(resolved.team1) : null}
+            {@const t2 = resolved.team2 ? team(resolved.team2) : null}
             {@const has = game.score1 !== null && game.score2 !== null}
             {@const w1 = has && game.score1 > game.score2}
             {@const w2 = has && game.score2 > game.score1}
             {@const hasPhoto = !!photoMap[game.id]}
             {@const bracket = roundBracket[game.round]}
+            {@const projected1 = game.team1 == null && !!game.source1}
+            {@const projected2 = game.team2 == null && !!game.source2}
 
             <button
               class="po-card"
@@ -110,7 +173,12 @@
               <div class="po-team" class:is-winner={w1} class:is-loser={has && !w1}>
                 {#if t1}
                   <span class="po-bar" style="background:{t1.color}"></span>
-                  <span class="po-name">{t1.name}</span>
+                  <div class="po-team-info">
+                    <span class="po-name">{t1.name}</span>
+                    {#if projected1}
+                      <span class="po-source-sub">{game.source1}</span>
+                    {/if}
+                  </div>
                 {:else}
                   <span class="po-source">{game.source1}</span>
                 {/if}
@@ -122,7 +190,12 @@
               <div class="po-team" class:is-winner={w2} class:is-loser={has && !w2}>
                 {#if t2}
                   <span class="po-bar" style="background:{t2.color}"></span>
-                  <span class="po-name">{t2.name}</span>
+                  <div class="po-team-info">
+                    <span class="po-name">{t2.name}</span>
+                    {#if projected2}
+                      <span class="po-source-sub">{game.source2}</span>
+                    {/if}
+                  </div>
                 {:else}
                   <span class="po-source">{game.source2}</span>
                 {/if}
@@ -197,7 +270,37 @@
     font-size: 0.7rem;
     font-weight: 500;
     color: var(--text-dim);
+    margin-bottom: 0.75rem;
+  }
+
+  .projection-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
     margin-bottom: 1.25rem;
+    background: rgba(245, 158, 11, 0.08);
+    border-left: 3px solid #f59e0b;
+    border-radius: var(--radius-sm);
+    color: #b45309;
+  }
+
+  .proj-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .proj-text {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: var(--text-secondary);
+  }
+
+  .proj-text strong {
+    color: #b45309;
+    font-weight: 700;
   }
 
   /* --- Timeline --- */
@@ -316,11 +419,25 @@
     flex-shrink: 0;
   }
 
-  .po-name {
+  .po-team-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .po-name {
     font-weight: 600;
     font-size: 0.9rem;
     color: var(--text);
+  }
+
+  .po-source-sub {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.01em;
   }
 
   .po-source {

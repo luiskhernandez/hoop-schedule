@@ -103,7 +103,7 @@
       {:else if currentTab === 'standings'}
         <Standings games={tournament.regularSeason} teams={tournament.teams} />
       {:else if currentTab === 'playoffs'}
-        <Playoffs games={tournament.playoffs} teams={tournament.teams} {photoMap} {openPhoto} />
+        <Playoffs games={tournament.playoffs} regularSeason={tournament.regularSeason} teams={tournament.teams} {photoMap} {openPhoto} />
       {/if}
     {/if}
   </main>
