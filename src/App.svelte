@@ -110,12 +110,19 @@
     <div class="header-inner">
       <div class="brand">
         <div class="logo-mark">
-          <svg width="26" height="26" viewBox="0 0 40 40" fill="none">
-            <circle cx="20" cy="20" r="18" stroke="var(--accent)" stroke-width="2.5"/>
-            <path d="M20 2 L20 38" stroke="var(--accent)" stroke-width="1.2" opacity="0.35"/>
-            <path d="M2 20 L38 20" stroke="var(--accent)" stroke-width="1.2" opacity="0.35"/>
-            <path d="M20 8 C26 8, 32 14, 32 20" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
-            <path d="M20 32 C14 32, 8 26, 8 20" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <radialGradient id="headerBallGrad" cx="35%" cy="30%">
+                <stop offset="0%" stop-color="#ffa766"/>
+                <stop offset="60%" stop-color="#e66a2e"/>
+                <stop offset="100%" stop-color="#a13d0e"/>
+              </radialGradient>
+            </defs>
+            <circle cx="50" cy="50" r="48" fill="url(#headerBallGrad)" stroke="#1a0a04" stroke-width="2"/>
+            <line x1="2" y1="50" x2="98" y2="50" stroke="#1a0a04" stroke-width="2"/>
+            <line x1="50" y1="2" x2="50" y2="98" stroke="#1a0a04" stroke-width="2"/>
+            <path d="M14 18 Q50 50 14 82" stroke="#1a0a04" stroke-width="2" fill="none"/>
+            <path d="M86 18 Q50 50 86 82" stroke="#1a0a04" stroke-width="2" fill="none"/>
           </svg>
         </div>
         {#if tournament}
@@ -283,14 +290,18 @@
   }
 
   .logo-mark {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.25rem;
+    height: 2.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent-light);
-    border-radius: 0.75rem;
     flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(15, 46, 38, 0.15));
+  }
+
+  .logo-mark svg {
+    width: 100%;
+    height: 100%;
   }
 
   .title {

@@ -1,8 +1,6 @@
 <script>
   let { team, size } = $props();
 
-  const base = import.meta.env.BASE_URL;
-
   function contrastText(hex) {
     if (!hex) return '#ffffff';
     const h = hex.replace('#', '');
@@ -20,22 +18,20 @@
       : team.color
   );
 
-  let initialsText = $derived((team.short ?? team.name ?? '?').slice(0, 2).toUpperCase());
+  let shortCode = $derived((team.short ?? team.name ?? '?').toUpperCase());
+  let isSplit = $derived(!!team.color2);
 </script>
 
 <div
   class="crest"
-  class:has-logo={!!team.logo}
+  class:is-split={isSplit}
   style:background={bgStyle}
   style:--inline-size={size ? `${size}px` : null}
   style:--ink={contrastText(team.color)}
   aria-label={team.name}
+  title={team.name}
 >
-  {#if team.logo}
-    <img class="crest-img" src="{base}{team.logo}" alt="" loading="lazy" />
-  {:else}
-    <span class="crest-initials">{initialsText}</span>
-  {/if}
+  <span class="crest-code">{shortCode}</span>
 </div>
 
 <style>
@@ -48,29 +44,28 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 18%, transparent);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--text) 22%, transparent),
+      inset 0 -2px 5px color-mix(in srgb, #000 18%, transparent),
+      inset 0 1px 3px color-mix(in srgb, #fff 12%, transparent);
   }
 
-  .crest.has-logo {
-    padding: 2px;
-  }
-
-  .crest-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #fff;
-    display: block;
-  }
-
-  .crest-initials {
+  .crest-code {
     font-family: var(--font-display);
-    font-weight: 700;
-    font-size: calc(var(--inline-size, var(--crest-size, 32px)) * 0.42);
-    letter-spacing: 0.04em;
+    font-weight: 800;
+    font-size: calc(var(--inline-size, var(--crest-size, 32px)) * 0.32);
+    letter-spacing: 0.03em;
     color: var(--ink);
     line-height: 1;
-    padding-top: 0.08em;
+    padding-top: 0.06em;
+    user-select: none;
+  }
+
+  /* Split-color teams (e.g. Chiguiros): add a subtle stroke around the
+     letters so they stay legible over both halves. */
+  .crest.is-split .crest-code {
+    text-shadow:
+      0 0 2px color-mix(in srgb, #000 65%, transparent),
+      0 1px 0 color-mix(in srgb, #000 45%, transparent);
   }
 </style>
