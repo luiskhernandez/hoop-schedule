@@ -264,7 +264,7 @@
 
   .legend-dot.winners { background: var(--green); }
   .legend-dot.losers { background: var(--red); }
-  .legend-dot.final { background: #f59e0b; }
+  .legend-dot.final { background: var(--warning); }
 
   .format-note {
     font-size: 0.7rem;
@@ -279,10 +279,10 @@
     gap: 0.5rem;
     padding: 0.625rem 0.75rem;
     margin-bottom: 1.25rem;
-    background: rgba(245, 158, 11, 0.08);
-    border-left: 3px solid #f59e0b;
+    background: var(--warning-bg);
+    border-left: 3px solid var(--warning-border);
     border-radius: var(--radius-sm);
-    color: #b45309;
+    color: var(--warning-text);
   }
 
   .proj-icon {
@@ -299,7 +299,7 @@
   }
 
   .proj-text strong {
-    color: #b45309;
+    color: var(--warning-text);
     font-weight: 700;
   }
 
@@ -385,18 +385,18 @@
   }
 
   .bracket-tag.winners {
-    background: rgba(22, 163, 74, 0.1);
+    background: var(--green-bg);
     color: var(--green);
   }
 
   .bracket-tag.losers {
-    background: rgba(220, 38, 38, 0.08);
+    background: var(--red-bg);
     color: var(--red);
   }
 
   .bracket-tag.final {
-    background: rgba(245, 158, 11, 0.1);
-    color: #d97706;
+    background: var(--warning-bg);
+    color: var(--warning-text);
   }
 
   .po-team {

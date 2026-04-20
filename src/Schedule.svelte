@@ -190,16 +190,16 @@
   .week-chip:active { transform: scale(0.93); }
 
   .week-chip.round2 {
-    background: rgba(99, 102, 241, 0.06);
-    border-color: rgba(99, 102, 241, 0.12);
+    background: var(--info-bg);
+    border-color: color-mix(in srgb, var(--info) 18%, transparent);
   }
 
-  .week-chip.round2 .chip-num { color: #818cf8; }
+  .week-chip.round2 .chip-num { color: var(--info-light); }
 
   .week-chip.round2.selected {
-    background: #6366f1;
-    border-color: #6366f1;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    background: var(--info);
+    border-color: var(--info);
+    box-shadow: 0 2px 8px var(--info-shadow);
   }
 
   .week-chip.round2.selected .chip-num { color: white; }
@@ -207,11 +207,11 @@
   .week-chip.round2.selected .chip-dot { background: white; }
 
   .week-chip.round2.current {
-    border-color: #6366f1;
+    border-color: var(--info);
   }
 
-  .week-chip.round2.current .chip-num { color: #6366f1; }
-  .week-chip.round2.current .chip-label { color: #6366f1; }
+  .week-chip.round2.current .chip-num { color: var(--info); }
+  .week-chip.round2.current .chip-label { color: var(--info); }
 
   .round-divider {
     display: flex;
@@ -225,7 +225,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #6366f1;
+    color: var(--info);
     writing-mode: vertical-lr;
     text-orientation: mixed;
     transform: rotate(180deg);
@@ -260,7 +260,7 @@
   .week-chip.selected {
     background: var(--accent);
     border-color: var(--accent);
-    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+    box-shadow: 0 2px 8px var(--accent-shadow);
   }
 
   .week-chip.selected .chip-num { color: white; }
@@ -312,8 +312,8 @@
   }
 
   .week-round.r2 {
-    background: rgba(99, 102, 241, 0.08);
-    color: #6366f1;
+    background: var(--info-bg);
+    color: var(--info);
   }
 
   .games {

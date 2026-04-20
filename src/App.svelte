@@ -3,12 +3,69 @@
   import Standings from './Standings.svelte';
   import Playoffs from './Playoffs.svelte';
   import Lightbox from './Lightbox.svelte';
+  import Splash from './Splash.svelte';
+
+  const SPLASH_KEY = 'hoop-splash-v1-seen';
+  const THEME_KEY = 'hoop-theme';
+
+  function getInitialTheme() {
+    if (typeof window === 'undefined') return 'auto';
+    try {
+      const stored = localStorage.getItem(THEME_KEY);
+      if (stored === 'light' || stored === 'dark') return stored;
+    } catch {}
+    return 'auto';
+  }
+
+  function resolveTheme(t) {
+    if (t === 'light' || t === 'dark') return t;
+    return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+  }
 
   let tournament = $state(null);
   let photoMap = $state({});
   let currentTab = $state('schedule');
   let lightboxSrc = $state(null);
   let loading = $state(true);
+  let showSplash = $state(
+    typeof sessionStorage !== 'undefined' && sessionStorage.getItem(SPLASH_KEY) !== 'true'
+  );
+  let theme = $state(getInitialTheme());
+  let mediaTick = $state(0);
+  let effectiveTheme = $derived.by(() => {
+    mediaTick;
+    return resolveTheme(theme);
+  });
+
+  $effect(() => {
+    if (typeof document === 'undefined') return;
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  });
+
+  $effect(() => {
+    if (typeof window === 'undefined' || theme !== 'auto') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => { mediaTick++; };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  });
+
+  function toggleTheme() {
+    const next = effectiveTheme === 'dark' ? 'light' : 'dark';
+    theme = next;
+    try { localStorage.setItem(THEME_KEY, next); } catch {}
+  }
+
+  function dismissSplash() {
+    try { sessionStorage.setItem(SPLASH_KEY, 'true'); } catch {}
+    showSplash = false;
+  }
 
   const tabs = [
     { id: 'schedule', label: 'Games', icon: 'calendar' },
@@ -67,19 +124,40 @@
         {/if}
       </div>
 
-      <!-- Desktop tabs in header -->
-      <nav class="desktop-nav">
-        {#each tabs as tab}
-          <button
-            class="desktop-tab"
-            class:active={currentTab === tab.id}
-            onclick={() => currentTab = tab.id}
-            type="button"
-          >
-            {tab.label}
-          </button>
-        {/each}
-      </nav>
+      <div class="header-right">
+        <!-- Desktop tabs in header -->
+        <nav class="desktop-nav">
+          {#each tabs as tab}
+            <button
+              class="desktop-tab"
+              class:active={currentTab === tab.id}
+              onclick={() => currentTab = tab.id}
+              type="button"
+            >
+              {tab.label}
+            </button>
+          {/each}
+        </nav>
+
+        <button
+          class="theme-toggle"
+          onclick={toggleTheme}
+          type="button"
+          aria-label={effectiveTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={effectiveTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {#if effectiveTheme === 'dark'}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+            </svg>
+          {:else}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          {/if}
+        </button>
+      </div>
     </div>
   </header>
 
@@ -148,6 +226,10 @@
 
 <Lightbox src={lightboxSrc} onclose={() => lightboxSrc = null} />
 
+{#if showSplash}
+  <Splash tournamentName={tournament?.name} onDismiss={dismissSplash} />
+{/if}
+
 <style>
   .shell {
     display: flex;
@@ -166,6 +248,18 @@
     box-shadow: var(--shadow-sm);
     position: relative;
     z-index: 5;
+  }
+
+  /* Editorial masthead rule — short orange underline at bottom-left */
+  .header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 4rem;
+    height: 2px;
+    background: var(--accent);
+    z-index: 1;
   }
 
   .header-inner {
@@ -206,6 +300,38 @@
     font-weight: 500;
     color: var(--text-muted);
     margin-top: 0.1rem;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .theme-toggle:hover {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+
+  .theme-toggle svg {
+    width: 16px;
+    height: 16px;
   }
 
   /* Desktop nav — hidden on mobile */
@@ -336,9 +462,14 @@
   /* --- Desktop --- */
   @media (min-width: 768px) {
     .header {
-      padding: 0.875rem 2.5rem;
+      padding: 1.125rem 2.5rem;
       border-bottom: 1px solid var(--border);
       box-shadow: none;
+    }
+
+    .header::after {
+      left: 2.5rem;
+      width: 3.5rem;
     }
 
     .header-inner {

@@ -32,7 +32,7 @@
     position: fixed;
     inset: 0;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--overlay);
     backdrop-filter: blur(16px);
     display: flex;
     align-items: center;

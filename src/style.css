@@ -20,29 +20,73 @@
 }
 
 :root {
-  --bg: #f5f5f7;
-  --surface: #ffffff;
-  --surface2: #f0f0f3;
-  --border: #e8e8ed;
-  --border-hover: #d1d1d6;
-  --text: #1a1a1f;
-  --text-secondary: #4a4a55;
-  --text-muted: #8e8e99;
-  --text-dim: #b0b0ba;
-  --accent: #16a34a;
-  --accent-light: #dcfce7;
-  --accent-bg: rgba(22, 163, 74, 0.08);
-  --green: #16a34a;
-  --red: #dc2626;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  color-scheme: light dark;
+
+  /* Surfaces — paper-white editorial, warmth in accents only */
+  --bg: light-dark(#fbf9f4, #0b1e18);
+  --surface: light-dark(#ffffff, #15312a);
+  --surface2: light-dark(#f4efe6, #1e3d35);
+  --surface-warm: light-dark(#f8e4cf, #2a1810);
+  --border: light-dark(#ece6d8, #2d4d43);
+  --border-hover: light-dark(#d6cdba, #426158);
+
+  /* Text (deep forest ink) */
+  --text: light-dark(#0f2e26, #f8e4cf);
+  --text-secondary: light-dark(#2d4a40, #d4c3a8);
+  --text-muted: light-dark(#6b7d73, #9aa89f);
+  --text-dim: light-dark(#a59f8f, #6b7d73);
+
+  /* Primary action (basketball orange) */
+  --accent: light-dark(#e67e35, #ff944d);
+  --accent-hover: light-dark(#d46d26, #ffaa6e);
+  --accent-light: light-dark(#fce6d0, #3a2415);
+  --accent-bg: light-dark(rgba(230, 126, 53, 0.07), rgba(255, 148, 77, 0.12));
+  --accent-shadow: light-dark(rgba(230, 126, 53, 0.28), rgba(255, 148, 77, 0.35));
+
+  /* Brand (deep forest) */
+  --brand: light-dark(#0f2e26, #f8e4cf);
+
+  /* Semantic */
+  --green: light-dark(#1a4a3e, #4ade80);
+  --green-bg: light-dark(rgba(26, 74, 62, 0.06), rgba(74, 222, 128, 0.12));
+  --green-shadow: light-dark(rgba(26, 74, 62, 0.25), rgba(74, 222, 128, 0.35));
+  --red: light-dark(#c54d2e, #ff7a5c);
+  --red-bg: light-dark(rgba(197, 77, 46, 0.06), rgba(255, 122, 92, 0.1));
+  --warning: light-dark(#d97706, #fbbf24);
+  --warning-text: light-dark(#b45309, #fbbf24);
+  --warning-bg: light-dark(rgba(217, 119, 6, 0.08), rgba(251, 191, 36, 0.1));
+  --warning-border: light-dark(#f59e0b, #fbbf24);
+  --info: light-dark(#5f6bc9, #a5b4fc);
+  --info-light: light-dark(#818cf8, #c7d2fe);
+  --info-bg: light-dark(rgba(95, 107, 201, 0.06), rgba(165, 180, 252, 0.12));
+  --info-shadow: light-dark(rgba(95, 107, 201, 0.28), rgba(165, 180, 252, 0.35));
+
+  /* Overlay (lightbox, modals) */
+  --overlay: light-dark(rgba(15, 46, 38, 0.78), rgba(0, 0, 0, 0.88));
+
+  /* Shadows — refined, crisp, forest-tinted, hairline-ringed for editorial feel */
+  --shadow-sm: 0 0 0 1px light-dark(rgba(15, 46, 38, 0.05), rgba(255, 255, 255, 0.04)),
+               0 1px 2px light-dark(rgba(15, 46, 38, 0.05), rgba(0, 0, 0, 0.25));
+  --shadow-md: 0 0 0 1px light-dark(rgba(15, 46, 38, 0.06), rgba(255, 255, 255, 0.05)),
+               0 2px 8px light-dark(rgba(15, 46, 38, 0.06), rgba(0, 0, 0, 0.32));
+  --shadow-lg: 0 0 0 1px light-dark(rgba(15, 46, 38, 0.07), rgba(255, 255, 255, 0.06)),
+               0 6px 20px light-dark(rgba(15, 46, 38, 0.09), rgba(0, 0, 0, 0.38));
+
+  /* Splash background — cream is the hero here */
+  --splash-bg-from: light-dark(#fff6ea, #1a3a32);
+  --splash-bg-to: light-dark(#f5dcc2, #050f0c);
+  --splash-glow: light-dark(rgba(230, 126, 53, 0.22), rgba(255, 148, 77, 0.22));
+
+  /* Radii / typography / environment */
   --radius: 1rem;
   --radius-sm: 0.625rem;
   --font-display: 'Anybody', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
 
 html, body {
   height: 100%;

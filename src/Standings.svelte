@@ -125,8 +125,8 @@
   }
 
   .rank-card.top2 {
-    box-shadow: var(--shadow-md), 0 0 0 1.5px rgba(22, 163, 74, 0.15);
-    background: linear-gradient(135deg, rgba(22,163,74,0.03), var(--surface));
+    box-shadow: var(--shadow-md), 0 0 0 1.5px color-mix(in srgb, var(--green) 20%, transparent);
+    background: linear-gradient(135deg, var(--green-bg), var(--surface));
   }
 
   .rank-left {
