@@ -17,9 +17,9 @@
     { "id": "RS-05", "round": 1, "week": 2, "date": "2026-04-19", "day": "sunday",   "time": "10:00 AM", "team1": 1, "team2": 6, "score1": 35, "score2": 47 },
     { "id": "RS-06", "round": 1, "week": 2, "date": "2026-04-19", "day": "sunday",   "time": "11:00 AM", "team1": 3, "team2": 4, "score1": 42, "score2": 27 },
 
-    { "id": "RS-10", "round": 1, "week": 3, "date": "2026-04-25", "day": "saturday", "time": "3:30 PM",  "team1": 2, "team2": 6, "score1": null, "score2": null },
-    { "id": "RS-11", "round": 1, "week": 3, "date": "2026-04-26", "day": "sunday",   "time": "9:30 AM",  "team1": 1, "team2": 4, "score1": null, "score2": null },
-    { "id": "RS-12", "round": 1, "week": 3, "date": "2026-04-26", "day": "sunday",   "time": "10:30 AM", "team1": 3, "team2": 5, "score1": null, "score2": null },
+    { "id": "RS-10", "round": 1, "week": 3, "date": "2026-04-25", "day": "saturday", "time": "3:30 PM",  "team1": 2, "team2": 6, "score1": 46, "score2": 40 },
+    { "id": "RS-11", "round": 1, "week": 3, "date": "2026-04-26", "day": "sunday",   "time": "9:30 AM",  "team1": 1, "team2": 4, "score1": 53, "score2": 51 },
+    { "id": "RS-12", "round": 1, "week": 3, "date": "2026-04-26", "day": "sunday",   "time": "10:30 AM", "team1": 3, "team2": 5, "score1": 39, "score2": 41 },
 
     { "id": "RS-07", "round": 1, "week": 4, "date": "2026-05-03", "day": "sunday", "time": "8:30 AM",  "team1": 2, "team2": 4, "score1": null, "score2": null },
     { "id": "RS-08", "round": 1, "week": 4, "date": "2026-05-03", "day": "sunday",   "time": "9:30 AM",  "team1": 1, "team2": 3, "score1": null, "score2": null },
