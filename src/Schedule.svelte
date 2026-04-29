@@ -119,7 +119,7 @@
       <div class="week-info">
         <div class="week-info-left">
           <span class="week-title">Week {wn}</span>
-          <span class="week-dates">{shortDate(satDate)} – {shortDate(sunDate)}</span>
+          <span class="week-dates">{satDate ? `${shortDate(satDate)} – ${shortDate(sunDate)}` : shortDate(sunDate)}</span>
         </div>
         <span class="week-round" class:r2={round === 2}>Round {round}</span>
       </div>
