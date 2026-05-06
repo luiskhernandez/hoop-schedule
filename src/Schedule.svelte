@@ -24,11 +24,17 @@
     return Object.entries(map);
   });
 
+  function weekRound(gs) {
+    const r1 = gs.filter(g => g.round === 1).length;
+    const r2 = gs.filter(g => g.round === 2).length;
+    return r1 >= r2 ? 1 : 2;
+  }
+
   let currentWeek = $derived.by(() => {
     const today = new Date().toISOString().split('T')[0];
     for (const [w, gs] of weeks) {
-      const sun = gs.find(g => g.day === 'sunday')?.date;
-      if (sun && sun >= today) return Number(w);
+      const lastDate = gs.map(g => g.date).filter(Boolean).sort().pop();
+      if (lastDate && lastDate >= today) return Number(w);
     }
     return null;
   });
@@ -74,8 +80,8 @@
       {@const isSelected = wn === selectedWeek}
       {@const wGames = weeks.find(([ww]) => Number(ww) === wn)?.[1] || []}
       {@const hasResults = wGames.some(g => g.score1 !== null)}
-      {@const round = wGames[0]?.round}
-      {@const prevRound = idx > 0 ? (weeks[idx - 1][1][0]?.round) : round}
+      {@const round = weekRound(wGames)}
+      {@const prevRound = idx > 0 ? weekRound(weeks[idx - 1][1]) : round}
 
       {#if round !== prevRound}
         <div class="round-divider">
@@ -108,7 +114,8 @@
     {@const wn = Number(w)}
     {@const satDate = wGames.find(g => g.day === 'saturday')?.date}
     {@const sunDate = wGames.find(g => g.day === 'sunday')?.date}
-    {@const round = wGames[0]?.round}
+    {@const round = weekRound(wGames)}
+    {@const dateRange = satDate && sunDate ? `${shortDate(satDate)} – ${shortDate(sunDate)}` : satDate ? shortDate(satDate) : sunDate ? shortDate(sunDate) : 'TBD'}
 
     <section
       class="week-section"
@@ -119,7 +126,7 @@
       <div class="week-info">
         <div class="week-info-left">
           <span class="week-title">Week {wn}</span>
-          <span class="week-dates">{satDate ? `${shortDate(satDate)} – ${shortDate(sunDate)}` : shortDate(sunDate)}</span>
+          <span class="week-dates">{dateRange}</span>
         </div>
         <span class="week-round" class:r2={round === 2}>Round {round}</span>
       </div>
@@ -131,47 +138,60 @@
           {@const has = game.score1 !== null && game.score2 !== null}
           {@const w1 = has && game.score1 > game.score2}
           {@const w2 = has && game.score2 > game.score1}
+          {@const isForfeit = has && ((game.score1 === 0 && game.score2 === 20) || (game.score1 === 20 && game.score2 === 0))}
+          {@const forfeit1 = isForfeit && game.score1 === 0}
+          {@const forfeit2 = isForfeit && game.score2 === 0}
           {@const hasPhoto = !!photoMap[game.id]}
 
           <button
             class="game-card"
             class:has-photo={hasPhoto}
             class:played={has}
+            class:is-postponed={game.postponed}
+            class:is-forfeit={isForfeit}
             onclick={() => hasPhoto && openPhoto(game.id)}
             type="button"
-            style="animation-delay: {idx * 60}ms"
           >
             <div class="game-top">
-              <span class="game-day" class:is-sat={game.day === 'saturday'}>
-                {fmtDate(game.date)}{#if game.time} · {game.time}{/if}
-              </span>
-              {#if hasPhoto}
-                <span class="photo-badge">&#128247;</span>
-              {/if}
-              {#if !has}
-                <span class="upcoming-tag">Upcoming</span>
+              {#if game.postponed}
+                <span class="postponed-pill">Postponed</span>
+                <span class="tbd-text">Date TBD</span>
+              {:else}
+                <span class="game-day" class:is-sat={game.day === 'saturday'}>
+                  {fmtDate(game.date)}{#if game.time} · {game.time}{/if}
+                </span>
+                {#if hasPhoto}
+                  <span class="photo-badge">&#128247;</span>
+                {/if}
+                {#if isForfeit}
+                  <span class="walkover-tag">Walkover</span>
+                {:else if !has}
+                  <span class="upcoming-tag">Upcoming</span>
+                {/if}
               {/if}
             </div>
 
-            <div class="team-row" class:is-winner={w1} class:is-loser={has && !w1}>
+            <div class="team-row" class:is-winner={w1} class:is-loser={has && !w1} class:is-forfeiter={forfeit1}>
               <div class="team-id">
                 <Crest team={t1} />
                 <span class="team-name">{t1.name}</span>
+                {#if forfeit1}<span class="forfeit-label">forfeited</span>{/if}
               </div>
-              <span class="team-score" class:score-active={has}>
-                {#if has}{game.score1}{:else}–{/if}
+              <span class="team-score" class:score-active={has} class:is-w-badge={forfeit1}>
+                {#if forfeit1}W{:else if has}{game.score1}{:else}–{/if}
               </span>
             </div>
 
             <div class="team-divider"></div>
 
-            <div class="team-row" class:is-winner={w2} class:is-loser={has && !w2}>
+            <div class="team-row" class:is-winner={w2} class:is-loser={has && !w2} class:is-forfeiter={forfeit2}>
               <div class="team-id">
                 <Crest team={t2} />
                 <span class="team-name">{t2.name}</span>
+                {#if forfeit2}<span class="forfeit-label">forfeited</span>{/if}
               </div>
-              <span class="team-score" class:score-active={has}>
-                {#if has}{game.score2}{:else}–{/if}
+              <span class="team-score" class:score-active={has} class:is-w-badge={forfeit2}>
+                {#if forfeit2}W{:else if has}{game.score2}{:else}–{/if}
               </span>
             </div>
           </button>
@@ -388,12 +408,6 @@
     font-size: inherit;
     color: inherit;
     box-shadow: var(--shadow-sm);
-    animation: card-in 0.3s ease both;
-  }
-
-  @keyframes card-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
   }
 
   .game-card.has-photo { cursor: pointer; }
@@ -418,6 +432,104 @@
   }
 
   .game-day.is-sat { color: var(--accent); }
+
+  /* === Postponed (variant C: Status flag) === */
+  .game-card.is-postponed {
+    border-left: 4px solid var(--warning-border);
+    background:
+      linear-gradient(135deg,
+        color-mix(in srgb, var(--warning) 6%, transparent) 0%,
+        transparent 35%),
+      var(--surface);
+  }
+
+  .game-card.is-postponed .game-top {
+    background: var(--warning-bg);
+    gap: 0.6rem;
+  }
+
+  .postponed-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--warning-text);
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warning) 30%, transparent);
+    text-transform: uppercase;
+  }
+
+  .postponed-pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--warning);
+    animation: postponed-pulse 1.6s ease-in-out infinite;
+  }
+
+  .tbd-text {
+    margin-left: auto;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--warning-text);
+  }
+
+  @keyframes postponed-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.85); }
+  }
+
+  /* Mute the team rows on postponed cards a touch, without breaking the look */
+  .game-card.is-postponed :global(.crest) { filter: saturate(0.78); }
+
+  /* === Forfeit (variant A: W badge) === */
+  .walkover-tag {
+    margin-left: auto;
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--red);
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    background: var(--red-bg);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--red) 28%, transparent);
+  }
+
+  .team-score.is-w-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    min-width: unset;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    font-size: 1.05rem;
+    letter-spacing: 0;
+    box-shadow:
+      inset 0 -2px 4px rgba(0, 0, 0, 0.18),
+      0 1px 4px color-mix(in srgb, var(--red) 35%, transparent);
+  }
+
+  .forfeit-label {
+    margin-left: 0.5rem;
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--red);
+    letter-spacing: 0.02em;
+  }
 
   .photo-badge {
     font-size: 0.7rem;
